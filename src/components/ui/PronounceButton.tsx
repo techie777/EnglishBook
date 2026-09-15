@@ -13,7 +13,7 @@ interface PronounceButtonProps {
 export function PronounceButton({
   text,
   className = "",
-  size = 18,
+  size = 16,
   label = "Listen",
 }: PronounceButtonProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,9 +30,9 @@ export function PronounceButton({
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.85; // Slightly slower for clear Indian learners comprehension
+    utterance.rate = 0.85; // Slightly slower for clear comprehension
     utterance.pitch = 1;
-    utterance.lang = "en-IN"; // English (India) accent if available, falls back to en-US/en-GB
+    utterance.lang = "en-IN";
 
     utterance.onstart = () => setIsPlaying(true);
     utterance.onend = () => setIsPlaying(false);
@@ -46,10 +46,10 @@ export function PronounceButton({
       type="button"
       onClick={speak}
       aria-label={`Listen to pronunciation of ${text}`}
-      title={`Listen to pronunciation`}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors active:scale-95 ${className}`}
+      title="Listen to pronunciation"
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900 hover:bg-blue-100 transition-colors active:scale-95 ${className}`}
     >
-      <Volume2 size={size} className={isPlaying ? "animate-bounce text-amber-600" : ""} />
+      <Volume2 size={size} className={isPlaying ? "animate-pulse text-blue-600" : "text-blue-600"} />
       {label && <span>{label}</span>}
     </button>
   );

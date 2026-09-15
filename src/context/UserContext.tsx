@@ -32,6 +32,7 @@ const DEFAULT_PROFILE: UserProfile = {
   lastActiveDate: getTodayDateString(),
   xp: 50,
   streakFreeze: false,
+  favouriteSentenceIds: [],
 };
 
 interface UserContextValue {
@@ -41,16 +42,19 @@ interface UserContextValue {
   updateSettings: (level: VocabLevel, goals: string[]) => void;
   recordAnswer: (wordId: string, isCorrect: boolean) => void;
   completeGameSession: (
-    gameType: "fill-blanks" | "word-jumble",
+    gameType: "fill-blanks" | "word-jumble" | "sentence-jumble",
     totalQuestions: number,
     correctAnswers: number
   ) => GameSessionResult;
+  toggleFavouriteSentence: (sentenceId: string) => void;
+  isSentenceFavourited: (sentenceId: string) => boolean;
   signInWithGoogle: () => Promise<void>;
   sendPhoneOtp: (phone: string, containerId: string) => Promise<ConfirmationResult | null>;
   confirmPhoneOtp: (confirmation: ConfirmationResult, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetProgress: () => void;
   wordsLearnedCount: number;
+  favouriteSentencesCount: number;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -185,7 +189,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const completeGameSession = (
-    gameType: "fill-blanks" | "word-jumble",
+    gameType: "fill-blanks" | "word-jumble" | "sentence-jumble",
     totalQuestions: number,
     correctAnswers: number
   ): GameSessionResult => {
@@ -221,6 +225,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       streakIncremented: streakResult.streakIncrementedToday,
       newStreakCount: streakResult.newStreak,
     };
+  };
+
+  const toggleFavouriteSentence = (sentenceId: string) => {
+    setProfile((prev) => {
+      const currentList = prev.favouriteSentenceIds || [];
+      const exists = currentList.includes(sentenceId);
+      const updatedList = exists
+        ? currentList.filter((id) => id !== sentenceId)
+        : [...currentList, sentenceId];
+
+      const updated = { ...prev, favouriteSentenceIds: updatedList };
+      if (!prev.isGuest && db) {
+        setDoc(doc(db, "users", prev.uid), { favouriteSentenceIds: updatedList }, { merge: true }).catch(console.error);
+      }
+      return updated;
+    });
+  };
+
+  const isSentenceFavourited = (sentenceId: string): boolean => {
+    return Boolean(profile.favouriteSentenceIds?.includes(sentenceId));
   };
 
   const signInWithGoogle = async () => {
@@ -276,6 +300,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const wordsLearnedCount = Object.keys(wordProgress).length;
+  const favouriteSentencesCount = profile.favouriteSentenceIds?.length || 0;
 
   return (
     <UserContext.Provider
@@ -286,12 +311,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         updateSettings,
         recordAnswer,
         completeGameSession,
+        toggleFavouriteSentence,
+        isSentenceFavourited,
         signInWithGoogle,
         sendPhoneOtp,
         confirmPhoneOtp,
         signOut,
         resetProgress,
         wordsLearnedCount,
+        favouriteSentencesCount,
       }}
     >
       {children}

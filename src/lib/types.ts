@@ -25,6 +25,17 @@ export interface VocabWord {
   pronunciation?: string;
 }
 
+export interface DailySentence {
+  id: string;
+  day: number;
+  dayTitle: string;
+  hindi: string;
+  english: string;
+  category: string;
+  audioText?: string;
+  jumbleWords: string[];
+}
+
 export interface UserProfile {
   uid: string;
   isGuest: boolean;
@@ -37,6 +48,7 @@ export interface UserProfile {
   lastActiveDate: string; // YYYY-MM-DD
   xp: number;
   streakFreeze?: boolean; // Stub for future paid feature
+  favouriteSentenceIds?: string[];
   createdAt?: string;
 }
 
@@ -57,7 +69,7 @@ export interface CategoryInfo {
 }
 
 export interface GameSessionResult {
-  gameType: "fill-blanks" | "word-jumble";
+  gameType: "fill-blanks" | "word-jumble" | "sentence-jumble";
   totalQuestions: number;
   correctAnswers: number;
   xpEarned: number;

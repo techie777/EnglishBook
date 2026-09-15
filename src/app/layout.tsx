@@ -5,7 +5,7 @@ import { TopHeader } from "@/components/layout/TopHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 
 export const viewport: Viewport = {
-  themeColor: "#d97706",
+  themeColor: "#2563eb",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -54,10 +54,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col antialiased bg-[#faf8f5] dark:bg-[#0f1218] text-slate-900 dark:text-slate-100">
+      <body className="min-h-full flex flex-col antialiased bg-[#f8fafc] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
         <UserProvider>
           <TopHeader />
-          <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-4 py-4 md:py-6">
+          <main className="flex-1 w-full max-w-lg md:max-w-xl lg:max-w-2xl mx-auto px-4 py-4 md:py-6">
             {children}
           </main>
           <BottomNav />

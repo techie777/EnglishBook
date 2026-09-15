@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { getUserLevelBadge, LEVEL_TIERS } from "@/lib/gamification";
 import {
@@ -12,10 +13,12 @@ import {
   Check,
   ShieldAlert,
   Sparkles,
+  Bookmark,
+  ChevronRight,
 } from "lucide-react";
 
 export default function ProgressPage() {
-  const { profile, wordsLearnedCount } = useUser();
+  const { profile, wordsLearnedCount, favouriteSentencesCount } = useUser();
   const [copied, setCopied] = useState(false);
 
   const badge = getUserLevelBadge(profile.xp);
@@ -28,7 +31,6 @@ export default function ProgressPage() {
   const currentDay = now.getDate();
 
   // Active days mock/real calculation:
-  // Show active for today and recent days based on streakCount
   const activeDaysSet = new Set<number>();
   for (let i = 0; i < profile.streakCount; i++) {
     const day = currentDay - i;
@@ -43,7 +45,7 @@ export default function ProgressPage() {
   ];
 
   // WhatsApp share text generator
-  const shareText = `🔥 I'm on a ${profile.streakCount}-day English streak on SpeakEasy! ⚡ ${profile.xp} XP earned, ${wordsLearnedCount} words mastered. Practice conversational English with me: https://speakeasy-english.vercel.app`;
+  const shareText = `🔥 I'm on a ${profile.streakCount}-day English streak on SpeakEasy! ⚡ ${profile.xp} XP earned, ${favouriteSentencesCount} spoken sentences bookmarked. Practice conversational English with me: https://speakeasy-english.vercel.app`;
 
   const handleShareWhatsApp = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
@@ -63,11 +65,11 @@ export default function ProgressPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600">
+          <span className="text-xs font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">
             Fluency Tracker
           </span>
           <span className="text-xs text-slate-400">•</span>
-          <span className="text-xs font-semibold text-slate-500">
+          <span className="text-xs font-bold text-slate-500">
             {profile.isGuest ? "Guest Mode" : "Cloud Synced"}
           </span>
         </div>
@@ -75,14 +77,14 @@ export default function ProgressPage() {
           Your Progress & Streak
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-          Consistency beats intensity. Every daily session locks in long-term conversational confidence.
+          Consistency beats intensity. Every daily sentence practice locks in lifelong conversational confidence.
         </p>
       </div>
 
-      {/* Top 3 Metric Stat Cards */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* 4 Metric Stat Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* Streak */}
-        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-amber-900/10 dark:border-slate-800 shadow-card text-center">
+        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 shadow-card text-center">
           <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center mx-auto mb-1.5">
             <Flame size={18} className="fill-amber-500" />
           </div>
@@ -94,9 +96,9 @@ export default function ProgressPage() {
         </div>
 
         {/* Total XP */}
-        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-amber-900/10 dark:border-slate-800 shadow-card text-center">
-          <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center mx-auto mb-1.5">
-            <Zap size={18} className="fill-indigo-500" />
+        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 shadow-card text-center">
+          <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-1.5">
+            <Zap size={18} className="fill-brand-600" />
           </div>
           <span className="text-[10px] font-bold uppercase text-slate-400 block">Total XP</span>
           <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
@@ -106,7 +108,7 @@ export default function ProgressPage() {
         </div>
 
         {/* Words Learned */}
-        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-amber-900/10 dark:border-slate-800 shadow-card text-center">
+        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 shadow-card text-center">
           <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 flex items-center justify-center mx-auto mb-1.5">
             <BookOpen size={18} />
           </div>
@@ -116,13 +118,55 @@ export default function ProgressPage() {
           </span>
           <span className="text-[10px] text-slate-400 block">mastered</span>
         </div>
+
+        {/* Favourites Saved */}
+        <Link
+          href="/sentences?filter=favs"
+          className="glass-panel bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-100 dark:border-slate-800 shadow-card text-center hover:border-rose-400 transition-all group"
+        >
+          <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto mb-1.5 group-hover:scale-110 transition-transform">
+            <Bookmark size={18} className="fill-rose-500" />
+          </div>
+          <span className="text-[10px] font-bold uppercase text-slate-400 block">Saved</span>
+          <span className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400">
+            {favouriteSentencesCount}
+          </span>
+          <span className="text-[10px] text-slate-400 block">sentences</span>
+        </Link>
+      </div>
+
+      {/* Saved Sentences Quick Card */}
+      <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 shadow-card flex items-center justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center flex-shrink-0">
+            <Bookmark size={22} className="fill-rose-500" />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-slate-900 dark:text-white">
+              Your Bookmarked Spoken Sentences
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {favouriteSentencesCount === 0
+                ? "Tap the heart on any sentence to save it here for revision."
+                : `You have ${favouriteSentencesCount} sentences saved in your revision book.`}
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/sentences?filter=favs"
+          className="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-extrabold text-xs hover:bg-rose-100 flex items-center gap-1 transition-colors flex-shrink-0 ml-2"
+        >
+          <span>Open Book</span>
+          <ChevronRight size={14} />
+        </Link>
       </div>
 
       {/* Streak Calendar Widget */}
-      <section aria-labelledby="calendar-heading" className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border border-amber-900/10 dark:border-slate-800 p-5 sm:p-6 shadow-card">
+      <section aria-labelledby="calendar-heading" className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 sm:p-6 shadow-card">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Calendar size={18} className="text-brand-600" />
+            <Calendar size={18} className="text-brand-600 dark:text-brand-400" />
             <h2 id="calendar-heading" className="text-base font-extrabold text-slate-900 dark:text-white">
               {monthNames[currentMonth]} {currentYear} Practice Days
             </h2>
@@ -152,8 +196,8 @@ export default function ProgressPage() {
                   isActive
                     ? "bg-brand-500 text-white shadow-sm shadow-brand-500/30 scale-105"
                     : isToday
-                    ? "border-2 border-brand-500 text-brand-600 font-extrabold bg-amber-50/50"
-                    : "bg-gray-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400"
+                    ? "border-2 border-brand-500 text-brand-600 font-extrabold bg-brand-50/50"
+                    : "bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400"
                 }`}
               >
                 <span>{dayNum}</span>
@@ -166,7 +210,7 @@ export default function ProgressPage() {
         </div>
 
         {/* Streak Freeze Stub */}
-        <div className="mt-5 pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-500 flex items-center justify-center">
               <ShieldAlert size={15} />
@@ -230,7 +274,7 @@ export default function ProgressPage() {
       </section>
 
       {/* Fluency Tier Badge */}
-      <section aria-labelledby="tier-heading" className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border border-amber-900/10 dark:border-slate-800 p-5 shadow-card">
+      <section aria-labelledby="tier-heading" className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 shadow-card">
         <div className="flex items-center justify-between mb-3">
           <h2 id="tier-heading" className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
             Fluency Level
@@ -250,10 +294,10 @@ export default function ProgressPage() {
                 key={tier.title}
                 className={`p-3 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
                   isCurrent
-                    ? "border-brand-500 bg-amber-50/50 dark:bg-amber-950/30 text-brand-700 dark:text-brand-300"
+                    ? "border-brand-500 bg-brand-50/50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300"
                     : isUnlocked
-                    ? "border-gray-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                    : "border-dashed border-gray-200 dark:border-slate-800 opacity-40 text-slate-400"
+                    ? "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                    : "border-dashed border-slate-200 dark:border-slate-800 opacity-40 text-slate-400"
                 }`}
               >
                 <div className="flex items-center gap-2">

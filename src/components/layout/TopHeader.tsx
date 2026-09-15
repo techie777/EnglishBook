@@ -1,63 +1,185 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
-import { Flame, Zap, Sparkles } from "lucide-react";
+import {
+  Flame,
+  Zap,
+  Sun,
+  Moon,
+  MoreVertical,
+  User,
+  Heart,
+  BookOpen,
+  LogOut,
+} from "lucide-react";
 
 export function TopHeader() {
-  const { profile } = useUser();
+  const { profile, signOut } = useUser();
+  const [isDark, setIsDark] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("speakeasy_theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const activeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    setIsDark(activeDark);
+    if (activeDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("speakeasy_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("speakeasy_theme", "light");
+    }
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    await signOut();
+  };
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-amber-900/10 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 py-2.5 px-4">
-      <div className="max-w-4xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-2.5 px-4 shadow-sm">
+      <div className="max-w-xl mx-auto flex items-center justify-between">
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-500 to-amber-400 flex items-center justify-center text-white font-bold shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white font-black text-base shadow-sm shadow-blue-500/30 group-hover:scale-105 transition-transform">
             <span>S</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white leading-tight">
+            <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white leading-none">
               SpeakEasy
             </span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-brand-500">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 dark:text-blue-400 mt-0.5">
               English
             </span>
           </div>
         </Link>
 
-        {/* Gamification Stats */}
-        <div className="flex items-center gap-2">
+        {/* Right Action Icons & Gamification Stats */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Streak Badge */}
           <Link
             href="/progress"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200/60 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-bold hover:scale-105 transition-transform"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold hover:scale-105 transition-transform"
             title="Today's Streak"
           >
-            <Flame size={14} className="text-amber-500 fill-amber-500 animate-pulse" />
+            <Flame size={14} className="text-amber-500 fill-amber-500" />
             <span>{profile.streakCount}</span>
-            <span className="text-[10px] hidden sm:inline font-normal">days</span>
           </Link>
 
           {/* XP Pill */}
           <Link
             href="/progress"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/60 dark:border-indigo-800/40 text-indigo-700 dark:text-indigo-400 text-xs font-bold hover:scale-105 transition-transform"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-bold hover:scale-105 transition-transform"
             title="Total XP Earned"
           >
-            <Zap size={14} className="text-indigo-500 fill-indigo-500" />
+            <Zap size={13} className="text-blue-600 fill-blue-600" />
             <span>{profile.xp}</span>
-            <span className="text-[10px] hidden sm:inline font-normal">XP</span>
           </Link>
 
-          {/* Level Pill */}
-          <Link
-            href="/profile"
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+          {/* Light / Dark Mode Toggle */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            id="btn-theme-toggle"
+            aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title={isDark ? "Light Mode" : "Dark Mode"}
           >
-            <Sparkles size={12} className="text-amber-500" />
-            <span className="capitalize">{profile.level}</span>
-          </Link>
+            {isDark ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} />}
+          </button>
+
+          {/* Three-Dot Menu Options */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              id="btn-three-dots-menu"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Open menu options"
+              className={`p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${
+                menuOpen ? "bg-slate-100 dark:bg-slate-800 text-blue-600" : ""
+              }`}
+              title="More options"
+            >
+              <MoreVertical size={18} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 rounded-2xl shadow-elevated border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-fade-in">
+                <Link
+                  href="/profile"
+                  id="menu-item-profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <User size={15} className="text-blue-600" />
+                  <span>My Profile</span>
+                </Link>
+
+                <Link
+                  href="/sentences?filter=favs"
+                  id="menu-item-fav-sentences"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <Heart size={15} className="text-rose-500 fill-rose-500" />
+                  <span>Favourite Sentences</span>
+                </Link>
+
+                <Link
+                  href="/learn"
+                  id="menu-item-fav-words"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <BookOpen size={15} className="text-emerald-500" />
+                  <span>Vocabulary Library</span>
+                </Link>
+
+                <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                <button
+                  type="button"
+                  id="menu-item-logout"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left"
+                >
+                  <LogOut size={15} />
+                  <span>{profile.isGuest ? "Reset Guest Progress" : "Log Out"}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

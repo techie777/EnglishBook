@@ -9,137 +9,181 @@ import {
   ArrowRight,
   Flame,
   Lock,
+  Sparkles,
+  Volume2,
 } from "lucide-react";
 
 export default function PlayHubPage() {
   const { profile } = useUser();
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-6 pb-8">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600">
-            Game Arena
+          <span className="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            Interactive Arena
           </span>
           <span className="text-xs text-slate-400">•</span>
-          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            +10 XP per word + 50 Session Bonus
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            +10 XP per question + 50 Bonus
           </span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          Daily English Games
+          Spoken English Practice Games
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-          Short, 3-minute interactive challenges designed to build spontaneous recall without boring drills.
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
+          Short, 3-minute interactive challenges designed to build spontaneous speech order and conversational fluency.
         </p>
       </div>
 
-      {/* Primary Games Grid */}
+      {/* Featured Premier Game: Sentence Jumble (Align into Order) */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 shadow-elevated">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black tracking-wide">
+              <Sparkles size={14} className="text-amber-300" />
+              <span>🔥 Flagship Feature • Align into Order</span>
+            </span>
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white">
+              5 Sentences • Audio Included
+            </span>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-black mt-3.5 tracking-tight">
+            Sentence Jumble (वाक्य क्रम खेल)
+          </h2>
+          <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-md leading-relaxed font-medium">
+            Look at the Hindi sentence prompt (e.g. &ldquo;राम क्या खेलते हैं?&rdquo;), then tap the scrambled English words to align them into the perfect natural grammar order.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold">
+            <span className="px-3 py-1 rounded-xl bg-white/15 backdrop-blur-sm">
+              🇮🇳 Hindi to English
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-white/15 backdrop-blur-sm flex items-center gap-1">
+              <Volume2 size={13} />
+              Native Pronunciation
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-white/15 backdrop-blur-sm">
+              Word Chips Alignment
+            </span>
+          </div>
+
+          <div className="mt-5">
+            <Link
+              href="/play/sentence-jumble"
+              id="btn-play-sentence-jumble-featured"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white text-blue-700 font-black text-sm shadow-button hover:bg-blue-50 active:scale-95 transition-all"
+            >
+              <span>Play Sentence Jumble Now</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
+        <div className="absolute -right-12 -bottom-12 w-52 h-52 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
+      </div>
+
+      {/* Other Games Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Game 1: Fill in the Blanks */}
-        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-500/30 dark:border-brand-500/20 p-5 sm:p-6 shadow-card hover:border-brand-500 transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-card hover:border-emerald-500 transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center font-bold shadow-sm">
                 <Puzzle size={24} />
               </div>
-              <span className="text-[11px] font-extrabold px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300">
+              <span className="text-[11px] font-black px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300">
                 5 Questions
               </span>
             </div>
 
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">
               Fill in the Blanks
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
-              Read authentic everyday sentences with one missing word. Pick the most natural word from 4 multiple-choice options.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed font-medium">
+              Read authentic everyday sentences with one missing word. Pick the most natural word from 4 choices.
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-500">
-              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">
-                Sentence Context
+            <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold text-slate-500">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
+                Context & Grammar
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">
-                Grammar Flow
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
                 Multiple Choice
               </span>
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-800">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Link
               href="/play/fill-blanks"
               id="btn-play-fill-blanks"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition-all active:scale-95"
             >
               <span>Play Fill in the Blanks</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </Link>
           </div>
         </div>
 
         {/* Game 2: Word Jumble */}
-        <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/20 p-5 sm:p-6 shadow-card hover:border-indigo-500 transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-card hover:border-indigo-500 transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center font-bold shadow-sm">
                 <Clock size={24} />
               </div>
-              <span className="text-[11px] font-extrabold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 capitalize">
-                {profile.level} Mode
+              <span className="text-[11px] font-black px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 capitalize">
+                {profile.level} Level
               </span>
             </div>
 
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">
               Word Jumble
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
-              Unscramble mixed-up letter tiles to form the target word. Difficulty scales dynamically with your chosen level ({profile.level}).
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed font-medium">
+              Unscramble mixed-up letter tiles to spell the vocabulary word correctly. Scaled to your level.
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-500">
-              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">
+            <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold text-slate-500">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
                 Spelling Mastery
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">
-                Interactive Tiles
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">
-                Hint Assistance
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
+                Letter Tiles
               </span>
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-800">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Link
               href="/play/word-jumble"
               id="btn-play-word-jumble"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md transition-all active:scale-95"
             >
               <span>Play Word Jumble</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Gamification Reminder Banner */}
-      <div className="rounded-3xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 p-4 sm:p-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      {/* Streak Incentive Banner */}
+      <div className="rounded-3xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-5 flex items-center justify-between">
+        <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold flex-shrink-0">
-            <Flame size={20} className="fill-white" />
+            <Flame size={22} className="fill-white" />
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
-              Streak Bonus
+            <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200">
+              Streak Boost
             </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300">
-              Completing any 1 full game today advances your streak to{" "}
-              <strong className="text-amber-700 dark:text-amber-400">
-                Day {profile.streakCount + 1}
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+              Completing any 1 game session today locks in your{" "}
+              <strong className="text-amber-700 dark:text-amber-400 font-black">
+                Day {profile.streakCount + 1} streak
               </strong>
               !
             </p>
@@ -148,35 +192,35 @@ export default function PlayHubPage() {
 
         <Link
           href="/progress"
-          className="text-xs font-bold text-brand-600 hover:underline flex-shrink-0 ml-2"
+          className="text-xs font-black text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0 ml-2"
         >
-          View Streak Calendar →
+          View Calendar &rarr;
         </Link>
       </div>
 
       {/* Phase 2 Stubs */}
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 px-1">
           Coming in Phase 2 & 3
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/50 border border-dashed border-gray-200 dark:border-slate-800 opacity-70 flex items-center gap-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-800 opacity-70 flex items-center gap-3">
             <Lock size={18} className="text-slate-400" />
             <div>
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Speed Match (Vocab Flashcards)
+                Speed Flashcards
               </h4>
-              <span className="text-[10px] text-amber-600 font-semibold">Coming soon</span>
+              <span className="text-[10px] text-amber-600 font-bold">Coming soon</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/50 border border-dashed border-gray-200 dark:border-slate-800 opacity-70 flex items-center gap-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-800 opacity-70 flex items-center gap-3">
             <Lock size={18} className="text-slate-400" />
             <div>
               <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 AI Pronunciation Coach
               </h4>
-              <span className="text-[10px] text-amber-600 font-semibold">Coming soon</span>
+              <span className="text-[10px] text-amber-600 font-bold">Coming soon</span>
             </div>
           </div>
         </div>
