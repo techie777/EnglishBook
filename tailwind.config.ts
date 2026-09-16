@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,26 +12,51 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // Modern EdTech Electric Royal Blue (trust, focus, clarity)
+        // Warm Dual-Tone Amber & Gold Palette (scholastic, warm, engaging)
         brand: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          200: "#bfdbfe",
-          300: "#93c5fd",
-          400: "#60a5fa",
-          500: "#3b82f6",
-          600: "#2563eb", // Primary action
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#1e3a8a",
-          950: "#172554",
+          50: "#fffbeb",
+          100: "#fef3c7",
+          200: "#fde68a",
+          300: "#fcd34d",
+          400: "#fbbf24",
+          500: "#f59e0b",
+          600: "#d97706", // Primary action
+          700: "#b45309",
+          800: "#92400e",
+          900: "#78350f",
+          950: "#451a03",
+        },
+        // Warm Book / Kindle Paper Tones
+        paper: {
+          50: "#fdfbf7",
+          100: "#f7f4ec",
+          200: "#eee8da",
+          300: "#e3dac6",
+          400: "#d0c4ab",
+          500: "#a89b7e",
+          800: "#44403c",
+          900: "#1c1917",
+        },
+        // Deep Rich Reading Ink
+        ink: {
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+          950: "#0b0f19",
         },
         // Clean Sky/Cyan secondary
         sky: {
           500: "#0ea5e9",
           600: "#0284c7",
         },
-        // Gamification Golden Sun (for streaks & XP)
+        // Warm Antique Gold & Amber (for achievements, streaks & bookmarks)
         amber: {
           50: "#fffbeb",
           100: "#fef3c7",
@@ -40,6 +66,7 @@ const config: Config = {
           500: "#f59e0b",
           600: "#d97706",
           700: "#b45309",
+          800: "#92400e",
         },
         // Success Emerald (for correct answers & WhatsApp)
         emerald: {
@@ -56,23 +83,33 @@ const config: Config = {
         "4xl": "2rem",
       },
       boxShadow: {
-        subtle: "0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)",
-        card: "0 2px 12px -1px rgba(15, 23, 42, 0.06), 0 1px 4px -1px rgba(15, 23, 42, 0.04)",
-        elevated: "0 12px 28px -4px rgba(37, 99, 235, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.03)",
-        button: "0 4px 14px 0 rgba(37, 99, 235, 0.25)",
+        subtle: "0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03)",
+        card: "0 2px 8px -1px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.03)",
+        elevated: "0 10px 24px -4px rgba(29, 78, 216, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.03)",
+        button: "0 4px 12px 0 rgba(29, 78, 216, 0.2)",
       },
       fontFamily: {
         sans: [
+          "'Plus Jakarta Sans'",
+          "var(--font-sans)",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
           "'Segoe UI'",
           "Roboto",
-          "'Noto Sans Devanagari'",
           "sans-serif",
+        ],
+        reading: [
+          "var(--font-reading)",
+          "'Literata'",
+          "'Lora'",
+          "Georgia",
+          "'Times New Roman'",
+          "serif",
         ],
         hindi: [
           "'Noto Sans Devanagari'",
+          "var(--font-hindi)",
           "'Mukta'",
           "'Poppins'",
           "sans-serif",

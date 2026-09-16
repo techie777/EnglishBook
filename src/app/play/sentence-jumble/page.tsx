@@ -1,10 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { DAILY_SENTENCES, getAllDays } from "@/data/sentences-data";
+import {
+  getAllSentences,
+  SENTENCES_UPDATED_EVENT,
+} from "@/lib/services/sentence-storage";
 import { DailySentence, GameSessionResult } from "@/lib/types";
+import { getPracticeItemsByTopicAndLevel } from "@/data/practice-items-data";
+import { MASTER_TOPICS } from "@/data/topics-data";
+import { getCefrLabel } from "@/lib/schema/leveled-learning";
+import { AttemptResult } from "@/lib/services/progression-engine";
 import confetti from "canvas-confetti";
 import {
   Volume2,
@@ -21,6 +30,7 @@ import {
   Share2,
   Bookmark,
   GripHorizontal,
+  Award,
 } from "lucide-react";
 
 interface JumbleWordTile {
@@ -64,8 +74,20 @@ function playCrispSnapSound() {
   }
 }
 
-export default function SentenceJumbleGame() {
-  const { recordAnswer, completeGameSession, toggleFavouriteSentence, isSentenceFavourited } = useUser();
+function SentenceJumbleGameContent() {
+  const searchParams = useSearchParams();
+  const topicParam = searchParams.get("topic");
+  const levelParam = searchParams.get("level") ? parseInt(searchParams.get("level")!, 10) : null;
+  const topicMeta = topicParam ? MASTER_TOPICS.find((t) => t.topic_id === topicParam) : null;
+
+  const {
+    recordAnswer,
+    completeGameSession,
+    toggleFavouriteSentence,
+    isSentenceFavourited,
+    recordTopicAttempt,
+    getTopicProgress,
+  } = useUser();
 
   const [allDays] = useState(getAllDays());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -78,16 +100,70 @@ export default function SentenceJumbleGame() {
   const [correctCount, setCorrectCount] = useState(0);
   const [gameFinished, setGameFinished] = useState(false);
   const [sessionResult, setSessionResult] = useState<GameSessionResult | null>(null);
+  const [levelUpInfo, setLevelUpInfo] = useState<AttemptResult | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isDragOverDropzone, setIsDragOverDropzone] = useState(false);
   const draggedTileRef = useRef<JumbleWordTile | null>(null);
 
   // Initialize and scramble sentence queue
   const generateQueue = useCallback((dayFilter: number | null) => {
-    let pool = dayFilter ? DAILY_SENTENCES.filter((s) => s.day === dayFilter) : DAILY_SENTENCES;
+    // If leveled topic practice is requested via query param
+    if (topicParam) {
+      const activeLevel = levelParam || getTopicProgress(topicParam).current_level;
+      const practiceItems = getPracticeItemsByTopicAndLevel(topicParam, activeLevel)
+        .filter((item) => item.game_type === "sentence_jumble");
+
+      if (practiceItems.length > 0) {
+        const generated: JumbleSentenceItem[] = practiceItems.map((item) => {
+          const targetWords = item.payload.sentence_jumble?.correct_order && item.payload.sentence_jumble.correct_order.length > 0
+            ? [...item.payload.sentence_jumble.correct_order]
+            : (item.payload.prompt_en || "").trim().split(/\s+/);
+
+          const scrambled = item.payload.sentence_jumble?.scrambled_words && item.payload.sentence_jumble.scrambled_words.length > 0
+            ? [...item.payload.sentence_jumble.scrambled_words]
+            : [...targetWords].sort(() => 0.5 - Math.random());
+
+          const pseudoSentence: DailySentence = {
+            id: item.practice_id,
+            english: targetWords.join(" "),
+            hindi: item.payload.prompt_hi || "",
+            day: activeLevel,
+            dayTitle: `${topicMeta?.name || "Grammar"} • Level ${activeLevel}`,
+            category: `${topicMeta?.name || "Grammar"} • Level ${activeLevel}`,
+            audioText: targetWords.join(" "),
+            jumbleWords: targetWords,
+          };
+
+          return {
+            sentence: pseudoSentence,
+            targetWords,
+            scrambledWords: scrambled.map((word, id) => ({
+              id,
+              word,
+              isUsed: false,
+            })),
+          };
+        });
+
+        setQueue(generated);
+        setCurrentIndex(0);
+        setPlacedWords([]);
+        setIsEvaluated(false);
+        setIsCorrect(false);
+        setCorrectCount(0);
+        setGameFinished(false);
+        setSessionResult(null);
+        setLevelUpInfo(null);
+        return;
+      }
+    }
+
+    // Default Day-based Sentence Pool (dynamically includes admin / Excel uploaded sentences)
+    const allAvailable = getAllSentences();
+    let pool = dayFilter ? allAvailable.filter((s) => s.day === dayFilter) : allAvailable;
 
     if (pool.length < QUESTIONS_PER_SESSION) {
-      pool = DAILY_SENTENCES;
+      pool = allAvailable.length > 0 ? allAvailable : DAILY_SENTENCES;
     }
 
     const shuffledPool = [...pool].sort(() => 0.5 - Math.random()).slice(0, QUESTIONS_PER_SESSION);
@@ -123,10 +199,19 @@ export default function SentenceJumbleGame() {
     setCorrectCount(0);
     setGameFinished(false);
     setSessionResult(null);
-  }, []);
+    setLevelUpInfo(null);
+  }, [topicParam, levelParam, topicMeta?.name, getTopicProgress]);
 
   useEffect(() => {
     generateQueue(selectedDay);
+
+    const handleUpdate = () => {
+      generateQueue(selectedDay);
+    };
+    window.addEventListener(SENTENCES_UPDATED_EVENT, handleUpdate);
+    return () => {
+      window.removeEventListener(SENTENCES_UPDATED_EVENT, handleUpdate);
+    };
   }, [generateQueue, selectedDay]);
 
   // Audio speech synthesis helper
@@ -277,6 +362,20 @@ export default function SentenceJumbleGame() {
     }
 
     recordAnswer(currentItem.sentence.id, match);
+
+    // If practicing a leveled topic, record with progression engine
+    if (topicParam) {
+      const attemptRes = recordTopicAttempt(topicParam, match);
+      if (attemptRes.leveledUp) {
+        setLevelUpInfo(attemptRes);
+        confetti({
+          particleCount: 100,
+          spread: 100,
+          origin: { y: 0.4 },
+          colors: ["#f59e0b", "#ec4899", "#8b5cf6", "#10b981"],
+        });
+      }
+    }
   };
 
   // Next sentence
@@ -288,7 +387,7 @@ export default function SentenceJumbleGame() {
       setIsCorrect(false);
     } else {
       const totalCorrect = correctCount + (isCorrect ? 1 : 0);
-      const result = completeGameSession("sentence-jumble", QUESTIONS_PER_SESSION, totalCorrect);
+      const result = completeGameSession("sentence-jumble", queue.length, totalCorrect);
       setSessionResult(result);
       setGameFinished(true);
 
@@ -309,6 +408,8 @@ export default function SentenceJumbleGame() {
 
   // Game Completed Screen
   if (gameFinished && sessionResult) {
+    const activeProg = topicParam ? getTopicProgress(topicParam) : null;
+
     return (
       <div className="max-w-md mx-auto py-6 space-y-6">
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-center border border-slate-200/90 dark:border-slate-800 shadow-elevated">
@@ -317,26 +418,76 @@ export default function SentenceJumbleGame() {
           </div>
 
           <span className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
-            Jumble Cleared! • शानदार!
+            {topicParam ? `Topic Practice Completed • शानदार!` : `Jumble Cleared! • शानदार!`}
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
-            Sentence Order Mastered!
+            {levelUpInfo ? `🎉 CEFR Level Up!` : `Sentence Order Mastered!`}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 font-medium">
-            You successfully constructed real spoken English sentences from Hindi prompts.
+            {levelUpInfo
+              ? `You advanced to Level ${levelUpInfo.newLevel} (${getCefrLabel(levelUpInfo.newLevel)}) in ${topicMeta?.name || "Topic"} with 75%+ accuracy!`
+              : `You successfully constructed spoken English sentences from Hindi prompts.`}
           </p>
 
-          <div className="grid grid-cols-2 gap-3 my-6">
+          {/* Level Up Banner on Finish */}
+          {levelUpInfo && (
+            <div className="my-4 p-4 rounded-2xl bg-gradient-to-r from-amber-400/20 to-yellow-400/20 border border-amber-300 dark:border-amber-700/60 flex items-center gap-3 text-left">
+              <Award className="text-amber-500 flex-shrink-0" size={28} />
+              <div>
+                <span className="text-xs font-black text-amber-900 dark:text-amber-300 block">
+                  CEFR LEVEL UP BONUS: +50 XP
+                </span>
+                <span className="text-[11px] text-slate-700 dark:text-slate-300">
+                  New Level: <strong>Level {levelUpInfo.newLevel} ({getCefrLabel(levelUpInfo.newLevel)})</strong> unlocked!
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Leveled Topic Progression Card */}
+          {topicParam && activeProg && (
+            <div className="my-4 p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 text-left space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-blue-900 dark:text-blue-200 uppercase tracking-wider">
+                  {topicMeta?.name || "Topic"} Mastery
+                </span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-200 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                  Level {activeProg.current_level} ({getCefrLabel(activeProg.current_level)})
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
+                <span>Rolling Accuracy (last 10 attempts):</span>
+                <span className="font-black text-blue-600 dark:text-blue-400">
+                  {Math.round(activeProg.accuracy * 100)}%
+                </span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.round(activeProg.accuracy * 100)}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                {activeProg.recent_attempts.length < 10
+                  ? `Completed ${activeProg.recent_attempts.length}/10 attempts toward level review.`
+                  : activeProg.accuracy >= 0.75
+                  ? "75%+ mastery threshold met!"
+                  : "Keep practicing to reach 75% accuracy and unlock the next level!"}
+              </span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3 my-5">
             <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40">
               <span className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-wider block">
                 Total XP Earned
               </span>
               <div className="flex items-center justify-center gap-1 mt-1 font-black text-2xl text-blue-600 dark:text-blue-400">
                 <Zap size={22} className="fill-blue-600 dark:fill-blue-400" />
-                <span>+{sessionResult.xpEarned}</span>
+                <span>+{sessionResult.xpEarned + (levelUpInfo ? 50 : 0)}</span>
               </div>
               <span className="text-[10px] text-slate-500 block mt-0.5">
-                includes +50 session bonus
+                includes session bonus
               </span>
             </div>
 
@@ -368,16 +519,26 @@ export default function SentenceJumbleGame() {
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-button active:scale-95 transition-all"
             >
               <RotateCcw size={17} />
-              <span>Play Another 5 Sentences</span>
+              <span>Play Another Session</span>
             </button>
 
-            <Link
-              href="/sentences"
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-xs transition-colors"
-            >
-              <span>Explore All 120+ Spoken Sentences</span>
-              <ArrowRight size={14} />
-            </Link>
+            {topicParam ? (
+              <Link
+                href="/learn"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-xs transition-colors"
+              >
+                <span>Back to Learn ({topicMeta?.name || "Topics"})</span>
+                <ArrowRight size={14} />
+              </Link>
+            ) : (
+              <Link
+                href="/sentences"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-xs transition-colors"
+              >
+                <span>Explore All 120+ Spoken Sentences</span>
+                <ArrowRight size={14} />
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -386,7 +547,7 @@ export default function SentenceJumbleGame() {
 
   return (
     <div className="max-w-md mx-auto space-y-4 pb-8">
-      {/* Top Header & Day Selector */}
+      {/* Top Header & Day/Topic Selector */}
       <div className="flex items-center justify-between pt-1">
         <Link
           href="/play"
@@ -396,23 +557,60 @@ export default function SentenceJumbleGame() {
           <span>Back to Games</span>
         </Link>
 
-        {/* Day Filter Pill */}
-        <select
-          value={selectedDay ?? "all"}
-          onChange={(e) => {
-            const val = e.target.value === "all" ? null : parseInt(e.target.value, 10);
-            setSelectedDay(val);
-          }}
-          className="text-xs font-black py-1.5 px-3 rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-        >
-          <option value="all">🌟 All Days Mix</option>
-          {allDays.map((d) => (
-            <option key={d.day} value={d.day}>
-              Day {d.day}: {d.title}
-            </option>
-          ))}
-        </select>
+        {/* Leveled Topic Badge or Day Filter Pill */}
+        {topicParam ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black py-1.5 px-3 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800 flex items-center gap-1.5">
+              <Award size={13} className="text-amber-500" />
+              <span>{topicMeta?.name || "Topic"} • Level {levelParam || getTopicProgress(topicParam).current_level} ({getCefrLabel(levelParam || getTopicProgress(topicParam).current_level)})</span>
+            </span>
+            <Link
+              href="/learn"
+              className="text-xs font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400 underline"
+            >
+              Topics
+            </Link>
+          </div>
+        ) : (
+          <select
+            value={selectedDay ?? "all"}
+            onChange={(e) => {
+              const val = e.target.value === "all" ? null : parseInt(e.target.value, 10);
+              setSelectedDay(val);
+            }}
+            className="text-xs font-black py-1.5 px-3 rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+          >
+            <option value="all">🌟 All Days Mix</option>
+            {allDays.map((d) => (
+              <option key={d.day} value={d.day}>
+                Day {d.day}: {d.title}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
+
+      {/* Level Up Celebration Toast during gameplay */}
+      {levelUpInfo && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-lg animate-pulse flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Sparkles size={22} className="fill-slate-950" />
+            <div>
+              <div className="text-xs uppercase tracking-wider">🎉 CEFR LEVEL UP!</div>
+              <div className="text-xs font-bold">
+                Level {levelUpInfo.newLevel} ({getCefrLabel(levelUpInfo.newLevel)}) reached in {topicMeta?.name || "Topic"}! (+50 XP)
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLevelUpInfo(null)}
+            className="px-3 py-1 bg-black text-white text-xs rounded-lg font-bold"
+          >
+            Got it!
+          </button>
+        </div>
+      )}
 
       {/* Progress Bar for Session */}
       <div>
@@ -422,7 +620,7 @@ export default function SentenceJumbleGame() {
           </span>
           <span className="text-blue-600 dark:text-blue-400 font-black flex items-center gap-1">
             <Sparkles size={12} />
-            <span>Day {currentItem.sentence.day} • {currentItem.sentence.category}</span>
+            <span>{topicParam ? `${topicMeta?.name || "Topic"} Practice` : `Day ${currentItem.sentence.day} • ${currentItem.sentence.category}`}</span>
           </span>
         </div>
         <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
@@ -733,5 +931,20 @@ export default function SentenceJumbleGame() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function SentenceJumbleGame() {
+  return (
+    <Suspense
+      fallback={
+        <div className="text-center py-16">
+          <div className="inline-block animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-3" />
+          <p className="text-sm font-bold text-slate-600 dark:text-slate-400">Loading Game...</p>
+        </div>
+      }
+    >
+      <SentenceJumbleGameContent />
+    </Suspense>
   );
 }

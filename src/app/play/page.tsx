@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
+import { getCefrLabel } from "@/lib/schema/leveled-learning";
 import {
   Puzzle,
   Clock,
@@ -11,10 +12,13 @@ import {
   Lock,
   Sparkles,
   Volume2,
+  Award,
 } from "lucide-react";
 
 export default function PlayHubPage() {
-  const { profile } = useUser();
+  const { profile, getTopicProgress } = useUser();
+  const ppProgress = getTopicProgress("present_perfect");
+  const activeLevel = ppProgress.current_level || 3;
 
   return (
     <div className="space-y-6 pb-8">
@@ -37,35 +41,69 @@ export default function PlayHubPage() {
         </p>
       </div>
 
+      {/* Leveled Recommendation Banner */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center flex-shrink-0">
+            <Award size={26} className="text-amber-300" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20">
+                Recommended For Your Level
+              </span>
+              <span className="text-xs font-bold text-blue-100">
+                Level {activeLevel} • {getCefrLabel(activeLevel)}
+              </span>
+            </div>
+            <h2 className="text-base sm:text-lg font-black mt-0.5">
+              Practice Present Perfect (पूर्ण वर्तमानकाल)
+            </h2>
+            <p className="text-xs text-blue-100 font-medium">
+              Score 75%+ over 10 attempts to unlock the next CEFR level!
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href={`/play/sentence-jumble?topic=present_perfect&level=${activeLevel}`}
+          id="btn-play-recommended-topic"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-blue-50 text-blue-700 font-black text-xs shadow-md active:scale-95 transition-all flex-shrink-0"
+        >
+          <span>Start Level {activeLevel} Practice</span>
+          <ArrowRight size={14} />
+        </Link>
+      </div>
+
       {/* Featured Premier Game: Sentence Jumble (Align into Order) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 shadow-elevated">
-        <div className="relative z-10">
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm">
+        <div>
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black tracking-wide">
-              <Sparkles size={14} className="text-amber-300" />
-              <span>🔥 Flagship Feature • Align into Order</span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/60 text-[11px] font-bold">
+              <Sparkles size={14} className="text-amber-500 fill-amber-500" />
+              <span>Flagship Feature • Align into Order</span>
             </span>
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white">
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700">
               5 Sentences • Audio Included
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black mt-3.5 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold font-hindi mt-3.5 tracking-tight text-slate-900 dark:text-white">
             Sentence Jumble (वाक्य क्रम खेल)
           </h2>
-          <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-md leading-relaxed font-medium">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-xl leading-relaxed font-medium">
             Look at the Hindi sentence prompt (e.g. &ldquo;राम क्या खेलते हैं?&rdquo;), then tap the scrambled English words to align them into the perfect natural grammar order.
           </p>
 
-          <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold">
-            <span className="px-3 py-1 rounded-xl bg-white/15 backdrop-blur-sm">
+          <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold">
+            <span className="px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
               🇮🇳 Hindi to English
             </span>
-            <span className="px-3 py-1 rounded-xl bg-white/15 backdrop-blur-sm flex items-center gap-1">
+            <span className="px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
               <Volume2 size={13} />
               Native Pronunciation
             </span>
-            <span className="px-3 py-1 rounded-xl bg-white/15 backdrop-blur-sm">
+            <span className="px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
               Word Chips Alignment
             </span>
           </div>
@@ -74,15 +112,13 @@ export default function PlayHubPage() {
             <Link
               href="/play/sentence-jumble"
               id="btn-play-sentence-jumble-featured"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white text-blue-700 font-black text-sm shadow-button hover:bg-blue-50 active:scale-95 transition-all"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs active:scale-95 transition-all"
             >
               <span>Play Sentence Jumble Now</span>
               <ArrowRight size={16} />
             </Link>
           </div>
         </div>
-
-        <div className="absolute -right-12 -bottom-12 w-52 h-52 bg-sky-400/20 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* Other Games Grid */}

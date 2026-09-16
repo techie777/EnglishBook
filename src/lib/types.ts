@@ -32,6 +32,7 @@ export interface DailySentence {
   hindi: string;
   english: string;
   category: string;
+  level?: "Beginner" | "Intermediate" | "Expert" | string;
   audioText?: string;
   jumbleWords: string[];
 }
@@ -50,6 +51,15 @@ export interface UserProfile {
   streakFreeze?: boolean; // Stub for future paid feature
   favouriteSentenceIds?: string[];
   createdAt?: string;
+  ageGroup?: "kids" | "teens" | "adults";
+  placementCompleted?: boolean;
+  placedLevel?: number;
+  skillLevels?: {
+    read: { current: number; maxUnlocked: number };
+    speak: { current: number; maxUnlocked: number };
+    write: { current: number; maxUnlocked: number };
+    listen: { current: number; maxUnlocked: number };
+  };
 }
 
 export interface WordProgress {
