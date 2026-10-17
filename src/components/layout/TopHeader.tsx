@@ -67,15 +67,15 @@ export function TopHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-2.5 px-4 shadow-sm">
-      <div className="max-w-xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-2.5 px-4 sm:px-6 lg:px-8 shadow-sm transition-colors">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white font-black text-base shadow-sm shadow-blue-500/30 group-hover:scale-105 transition-transform">
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white font-black text-lg shadow-sm shadow-blue-500/30 group-hover:scale-105 transition-transform">
             <span>S</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white leading-none">
+            <span className="font-black text-base tracking-tight text-slate-900 dark:text-white leading-none">
               SpeakEasy
             </span>
             <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 dark:text-blue-400 mt-0.5">
@@ -84,26 +84,60 @@ export function TopHeader() {
           </div>
         </Link>
 
-        {/* Right Action Icons & Gamification Stats */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Streak Badge */}
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-1.5 lg:gap-2 text-xs lg:text-sm font-bold text-slate-600 dark:text-slate-300">
+          <Link
+            href="/"
+            className="px-3 py-1.5 rounded-xl hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            Home
+          </Link>
+          <Link
+            href="/"
+            className="px-3 py-1.5 rounded-xl hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            45-Day Course
+          </Link>
+          <Link
+            href="/play"
+            className="px-3 py-1.5 rounded-xl hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            Practice Games
+          </Link>
+          <Link
+            href="/learn"
+            className="px-3 py-1.5 rounded-xl hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            Vocabulary
+          </Link>
           <Link
             href="/progress"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold hover:scale-105 transition-transform"
-            title="Today's Streak"
+            className="px-3 py-1.5 rounded-xl hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
-            <Flame size={14} className="text-amber-500 fill-amber-500" />
-            <span>{profile.streakCount}</span>
+            Progress
+          </Link>
+        </nav>
+
+        {/* Right Action Icons & Gamification Stats */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Streak Badge with Unambiguous Label */}
+          <Link
+            href="/progress"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold hover:scale-105 transition-transform"
+            title="Today's Streak Count"
+          >
+            <Flame size={15} className="text-amber-500 fill-amber-500 animate-pulse" />
+            <span>{profile.streakCount} <span className="hidden sm:inline">Day</span> Streak</span>
           </Link>
 
-          {/* XP Pill */}
+          {/* XP Pill with Unambiguous Label */}
           <Link
             href="/progress"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-bold hover:scale-105 transition-transform"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-bold hover:scale-105 transition-transform"
             title="Total XP Earned"
           >
-            <Zap size={13} className="text-blue-600 fill-blue-600" />
-            <span>{profile.xp}</span>
+            <Zap size={14} className="text-blue-600 fill-blue-600" />
+            <span>{profile.xp} XP</span>
           </Link>
 
           {/* Light / Dark Mode Toggle */}

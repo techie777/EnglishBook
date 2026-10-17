@@ -57,7 +57,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased bg-[#f8fafc] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
         <UserProvider>
           <TopHeader />
-          <main className="flex-1 w-full max-w-lg md:max-w-xl lg:max-w-2xl mx-auto px-4 py-4 md:py-6">
+          <main className="flex-1 w-full">
             {children}
           </main>
           <BottomNav />

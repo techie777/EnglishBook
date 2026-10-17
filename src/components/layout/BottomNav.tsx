@@ -19,7 +19,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 py-2 px-3 safe-area-pb shadow-elevated"
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-panel border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 py-2 px-3 safe-area-pb shadow-elevated"
     >
       <div className="max-w-md mx-auto flex items-center justify-around">
         {navItems.map((item) => {
