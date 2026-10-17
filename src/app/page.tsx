@@ -1,18 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
-<<<<<<< HEAD
 import { COURSE_45_DAYS, COURSE_PHASES, DayCourseData, CourseSentence } from "@/data/course-45-days";
-import { SplashScreen } from "@/components/course/SplashScreen";
-import { PersonaSelector } from "@/components/course/PersonaSelector";
-import { DiagnosticQuiz } from "@/components/course/DiagnosticQuiz";
 import { GraduationCertificateModal } from "@/components/course/GraduationCertificateModal";
-=======
-import { DAILY_SENTENCES, getAllDays } from "@/data/sentences-data";
-import { VOCAB_WORDS } from "@/data/vocab-data";
->>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
+import { EasyOnboardingModal } from "@/components/home/EasyOnboardingModal";
+import { CumulativePracticeStudio } from "@/components/home/CumulativePracticeStudio";
+import { Day1ProgressiveQuestStudio } from "@/components/home/Day1ProgressiveQuestStudio";
+import { AgeGroup } from "@/lib/schema/leveled-learning";
 import {
   Sparkles,
   Volume2,
@@ -22,11 +18,11 @@ import {
   RefreshCw,
   Bookmark,
   Share2,
-<<<<<<< HEAD
   CheckCircle2,
   ArrowRight,
   Play,
   Flame,
+  Zap,
   Award,
   BookOpen,
   Gamepad2,
@@ -39,16 +35,18 @@ import {
   ChevronRight,
   ChevronLeft,
   Lock,
-  Printer,
+  Search,
   RotateCcw,
-  Zap,
-=======
+  SlidersHorizontal,
+  X,
   Languages,
-  Check,
-  BookOpen,
-  Heart,
-  Target,
->>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
+  TrendingUp,
+  Smile,
+  GraduationCap,
+  Square,
+  CheckSquare,
+  Clock,
+  Sprout,
 } from "lucide-react";
 
 // --- SYNTHESIZED WEB AUDIO SFX (Zero external audio file dependency) ---
@@ -63,7 +61,7 @@ class SoundEffects {
     }
   }
 
-  private static playTone(freq: number, type: OscillatorType = "sine", duration = 0.15, gain = 0.1) {
+  private static playTone(freq: number, type: OscillatorType = "sine", duration = 0.15, gain = 0.08) {
     try {
       this.init();
       if (!this.ctx) return;
@@ -83,196 +81,254 @@ class SoundEffects {
     }
   }
 
-  static success(mode: "kids" | "teen" | "adult" = "adult") {
-    if (mode === "kids") {
-      this.playTone(523.25, "triangle", 0.1, 0.15); // C5
-      setTimeout(() => this.playTone(659.25, "triangle", 0.12, 0.15), 100); // E5
-      setTimeout(() => this.playTone(783.99, "triangle", 0.22, 0.2), 200); // G5
-      setTimeout(() => this.playTone(1046.5, "triangle", 0.35, 0.2), 320); // C6
-    } else if (mode === "teen") {
-      this.playTone(440, "sine", 0.08, 0.12);
-      setTimeout(() => this.playTone(880, "sine", 0.15, 0.15), 80);
-    } else {
-      this.playTone(600, "sine", 0.12, 0.08);
-      setTimeout(() => this.playTone(800, "sine", 0.15, 0.08), 90);
-    }
+  static success() {
+    this.playTone(523.25, "triangle", 0.1, 0.1); // C5
+    setTimeout(() => this.playTone(659.25, "triangle", 0.12, 0.1), 100); // E5
+    setTimeout(() => this.playTone(783.99, "triangle", 0.2, 0.12), 200); // G5
   }
 
   static pop() {
-    this.playTone(750, "sine", 0.06, 0.08);
+    this.playTone(750, "sine", 0.05, 0.06);
   }
 
   static error() {
-    this.playTone(280, "sawtooth", 0.18, 0.1);
-    setTimeout(() => this.playTone(220, "sawtooth", 0.25, 0.12), 120);
+    this.playTone(280, "sawtooth", 0.15, 0.08);
+    setTimeout(() => this.playTone(220, "sawtooth", 0.2, 0.1), 100);
   }
 }
 
-type FlowStep = "splash" | "persona-select" | "diagnostic-test" | "course-dashboard";
-type DifficultyLevel = "easy" | "medium" | "hard";
-type DayStudioTab = "sentences" | "reading" | "games";
+type MainDashboardView = "dashboard" | "roadmap" | "lesson-studio" | "speak-repeat";
+type StudioTab = "sentences" | "reading" | "games";
 
-export default function Home() {
-  const { profile, toggleFavouriteSentence, isSentenceFavourited } = useUser();
-<<<<<<< HEAD
-=======
-  const [allDays] = useState(getAllDays());
-  const [isSpeakingSentence, setIsSpeakingSentence] = useState(false);
-  const [isSpeakingWord, setIsSpeakingWord] = useState(false);
->>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
+// Chintu The Scholar Owl Mascot SVG
+const ScholarOwl = ({ className = "w-28 h-28" }: { className?: string }) => (
+  <svg viewBox="0 0 120 130" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Body */}
+    <ellipse cx="60" cy="75" rx="38" ry="42" fill="#2563EB" />
+    <ellipse cx="60" cy="80" rx="28" ry="32" fill="#E0F2FE" />
+    {/* Wings */}
+    <path d="M22 65C20 80 26 95 34 102C32 90 28 75 25 65Z" fill="#1D4ED8" />
+    <path d="M98 65C100 80 94 95 86 102C88 90 92 75 95 65Z" fill="#1D4ED8" />
+    {/* Feet */}
+    <ellipse cx="48" cy="116" rx="8" ry="5" fill="#F59E0B" />
+    <ellipse cx="72" cy="116" rx="8" ry="5" fill="#F59E0B" />
+    {/* Big Eyes */}
+    <circle cx="45" cy="52" r="16" fill="white" stroke="#1E40AF" strokeWidth="2.5" />
+    <circle cx="75" cy="52" r="16" fill="white" stroke="#1E40AF" strokeWidth="2.5" />
+    <circle cx="45" cy="52" r="9" fill="#0284C7" />
+    <circle cx="75" cy="52" r="9" fill="#0284C7" />
+    <circle cx="45" cy="52" r="5" fill="#0F172A" />
+    <circle cx="75" cy="52" r="5" fill="#0F172A" />
+    <circle cx="48" cy="49" r="2.5" fill="white" />
+    <circle cx="78" cy="49" r="2.5" fill="white" />
+    {/* Beak */}
+    <polygon points="60,58 54,68 66,68" fill="#F59E0B" />
+    {/* Graduation Cap */}
+    <polygon points="60,18 20,29 60,38 100,29" fill="#1E293B" />
+    <rect x="44" y="32" width="32" height="9" rx="3" fill="#0F172A" />
+    {/* Tassel */}
+    <path d="M60 28L32 36L30 48" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+    <circle cx="30" cy="50" r="3" fill="#F59E0B" />
+  </svg>
+);
 
-  // Onboarding Flow State
-  const [flowStep, setFlowStep] = useState<FlowStep>("splash");
-  const [hasPreviousSession, setHasPreviousSession] = useState(false);
+// Conversing Characters SVG Illustration for Today's Learning Mission banner
+const ConversationIllustration = ({ className = "w-full max-w-[210px]" }: { className?: string }) => (
+  <svg viewBox="0 0 210 155" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Background Soft Arch Window */}
+    <rect x="15" y="10" width="180" height="145" rx="28" fill="#F0F9FF" />
+    <path d="M30 40H180" stroke="#E0F2FE" strokeWidth="1.5" strokeDasharray="4 4" />
+    
+    {/* Left Character: Boy in Blue Shirt */}
+    <path d="M22 155C22 128 35 116 54 114C65 114 74 118 78 124L74 155H22Z" fill="#3B82F6" />
+    <path d="M50 114L54 122L58 114" stroke="#2563EB" strokeWidth="2" />
+    <rect x="49" y="100" width="10" height="16" rx="2" fill="#FCD34D" />
+    <circle cx="54" cy="82" r="17" fill="#FCD34D" />
+    <path d="M37 78C37 65 45 58 57 58C68 58 73 64 73 72C73 76 70 77 66 75C62 73 58 75 54 78C50 81 44 81 39 79Z" fill="#1E293B" />
+    <circle cx="41" cy="82" r="3" fill="#FCD34D" />
+    <circle cx="60" cy="80" r="2" fill="#0F172A" />
+    <path d="M58 87C61 89 65 88 67 85" stroke="#0F172A" strokeWidth="1.5" strokeLinecap="round" />
 
-<<<<<<< HEAD
-  // User Learning Preferences
-  const [persona, setPersona] = useState<"kids" | "teen" | "adult">("kids");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>("easy");
-  const [activeDayNumber, setActiveDayNumber] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<DayStudioTab>("sentences");
-  const [selectedPhaseFilter, setSelectedPhaseFilter] = useState<number | "all">("all");
-  const [testScore, setTestScore] = useState<number>(100);
+    {/* Right Character: Girl in Pink Top */}
+    <path d="M130 76C130 62 140 58 152 58C166 58 174 68 174 90C174 112 170 134 165 145L154 140L152 104Z" fill="#1E293B" />
+    <path d="M126 155L130 124C135 118 144 114 154 114C168 116 182 128 182 155H126Z" fill="#EC4899" />
+    <path d="M149 114L153 121L157 114" stroke="#DB2777" strokeWidth="2" />
+    <rect x="148" y="100" width="10" height="16" rx="2" fill="#FDE68A" />
+    <circle cx="153" cy="82" r="17" fill="#FDE68A" />
+    <circle cx="167" cy="82" r="3" fill="#FDE68A" />
+    <circle cx="147" cy="80" r="2" fill="#0F172A" />
+    <path d="M142 87C144 89 148 89 150 86" stroke="#0F172A" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M136 75C140 66 150 63 162 67C158 72 150 74 142 74Z" fill="#1E293B" />
 
-  // Accessibility Controls
-  const [fontSize, setFontSize] = useState<"normal" | "large" | "xlarge">("normal");
-  const [speechRate, setSpeechRate] = useState<number>(1.0);
-  const [bilingual, setBilingual] = useState<boolean>(true);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+    {/* Speech Bubble "Hello!" */}
+    <g transform="translate(80, 32)">
+      <rect x="0" y="0" width="56" height="28" rx="14" fill="#0284C7" />
+      <polygon points="18,27 24,33 26,27" fill="#0284C7" />
+      <text x="28" y="18" textAnchor="middle" fill="white" fontSize="11" fontWeight="800" fontFamily="sans-serif">Hello!</text>
+    </g>
 
-  // Audio & Speech States
-  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [micFeedback, setMicFeedback] = useState<{ score: number; transcript: string; message: string } | null>(null);
+    {/* Conversation Dots between characters */}
+    <circle cx="98" cy="90" r="2" fill="#93C5FD" />
+    <circle cx="106" cy="90" r="2" fill="#93C5FD" />
+    <circle cx="114" cy="90" r="2" fill="#93C5FD" />
+  </svg>
+);
 
-  // Day's In-Dashboard Game State
-  const [userSentence, setUserSentence] = useState<string[]>([]);
-  const [poolWords, setPoolWords] = useState<string[]>([]);
-  const [gameEvaluated, setGameEvaluated] = useState<null | "success" | "retry">(null);
+export default function HomePage() {
+  const { profile, toggleFavouriteSentence, isSentenceFavourited, setAgeGroup, updateSettings } = useUser();
+
+  // Easy Onboarding Modal State (Kids, Teenager, Adult & Purpose of Learning)
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [onboardingInitialPhase, setOnboardingInitialPhase] = useState<"splash" | "onboarding">("splash");
+
+  const handleCompleteOnboarding = (ageGroup: AgeGroup, purposes: string[]) => {
+    setAgeGroup(ageGroup);
+    updateSettings("beginner", purposes);
+    setIsOnboardingOpen(false);
+    SoundEffects.success();
+    triggerConfetti();
+    const groupName = ageGroup === "kids" ? "kids" : ageGroup === "teens" ? "teenager" : "adult";
+    speakText(`Welcome! Your personalized ${groupName} English course is ready!`);
+  };
+
+  // Active View Navigation
+  const [currentView, setCurrentView] = useState<MainDashboardView>("dashboard");
+
+  // Level 2 Mode Switcher: Learning Course (1) vs Mixed Cumulative Practice (2)
+  const [dashboardMode, setDashboardMode] = useState<"learning" | "practice">("learning");
+
+  // Active Day & Difficulty
+  const [activeDayNumber, setActiveDayNumber] = useState<number>(1); // Default to Day 1 Progressive Quest
+  const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "medium" | "hard">("medium");
+
+  // Lesson Studio State
+  const [studioTab, setStudioTab] = useState<StudioTab>("sentences");
+  const [activeSentenceIndex, setActiveSentenceIndex] = useState<number>(0);
+  const [showKeyVocab, setShowKeyVocab] = useState<boolean>(true);
+
+  // Roadmap State
+  const [roadmapSearch, setRoadmapSearch] = useState("");
+  const [roadmapPhaseFilter, setRoadmapPhaseFilter] = useState<number | "all">("all");
+
+  // Word Jumble Game State (matching middle-center screen of mockup)
+  const [userPlacedWords, setUserPlacedWords] = useState<string[]>([]);
+  const [availableChips, setAvailableChips] = useState<string[]>([]);
+  const [jumbleScore, setJumbleScore] = useState<number>(2);
+  const [jumbleFeedback, setJumbleFeedback] = useState<null | "success" | "retry">(null);
+
+  // Speak & Repeat Lab State (matching middle-right screen of mockup)
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [micRecognizedText, setMicRecognizedText] = useState<string | null>(null);
+  const [micScore, setMicScore] = useState<number | null>(null);
+
+  // Audio Playback State
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   // Certificate Modal State
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
 
-  // Active Day Data
-  const activeDay: DayCourseData = COURSE_45_DAYS.find((d) => d.day === activeDayNumber) || COURSE_45_DAYS[0];
+  // Active Day Data Object
+  const activeDay: DayCourseData =
+    COURSE_45_DAYS.find((d) => d.day === activeDayNumber) || COURSE_45_DAYS[6] || COURSE_45_DAYS[0];
 
-  // Initialize from LocalStorage
-  useEffect(() => {
-    try {
-      const storedCompleted = localStorage.getItem("speakeasy_onboarded");
-      const storedPersona = localStorage.getItem("speakeasy_persona") as "kids" | "teen" | "adult" | null;
-      const storedDay = localStorage.getItem("speakeasy_active_day");
-      const storedLevel = localStorage.getItem("speakeasy_level") as DifficultyLevel | null;
+  const currentSentences: CourseSentence[] =
+    activeDay.sentences[selectedDifficulty] || activeDay.sentences.easy;
 
-      if (storedPersona) setPersona(storedPersona);
-      if (storedDay) setActiveDayNumber(parseInt(storedDay, 10));
-      if (storedLevel) setSelectedDifficulty(storedLevel);
+  const currentSentence = currentSentences[activeSentenceIndex] || currentSentences[0];
 
-      if (storedCompleted === "true") {
-        setHasPreviousSession(true);
-        // Default returning users directly to course dashboard
-        setFlowStep("course-dashboard");
-      } else {
-        setFlowStep("splash");
-      }
-    } catch {
-      // Storage fallback
-    }
-  }, []);
-
-  // Sync game words whenever active day changes
+  // Initialize Game Chips whenever active day changes
   useEffect(() => {
     if (activeDay.game.scrambled) {
-      setPoolWords([...activeDay.game.scrambled]);
+      setAvailableChips([...activeDay.game.scrambled]);
     } else {
-      setPoolWords(activeDay.game.correctAnswer.split(" "));
+      setAvailableChips(activeDay.game.correctAnswer.split(" "));
     }
-    setUserSentence([]);
-    setGameEvaluated(null);
-    setMicFeedback(null);
+    setUserPlacedWords([]);
+    setJumbleFeedback(null);
+    setActiveSentenceIndex(0);
+    setMicRecognizedText(null);
+    setMicScore(null);
   }, [activeDayNumber]);
 
-  // Save current day to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("speakeasy_active_day", activeDayNumber.toString());
-      localStorage.setItem("speakeasy_persona", persona);
-      localStorage.setItem("speakeasy_level", selectedDifficulty);
-    } catch {
-      // Storage fallback
-    }
-  }, [activeDayNumber, persona, selectedDifficulty]);
-
-  // Audio SFX trigger
-  const playSfx = (type: "success" | "pop" | "error") => {
-    if (!soundEnabled) return;
-    if (type === "success") SoundEffects.success(persona);
-    else if (type === "pop") SoundEffects.pop();
-    else if (type === "error") SoundEffects.error();
-  };
-
-  // Text-To-Speech (Native Web Speech API with rate control)
-  const speakSentence = (text: string) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      alert("Speech synthesis is not supported on this device/browser.");
-      return;
-    }
+  // Text-To-Speech (Native Web Speech API)
+  const speakText = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    playSfx("pop");
+    SoundEffects.pop();
     setIsAudioPlaying(true);
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = speechRate;
     utterance.lang = "en-IN";
+    utterance.rate = 0.95;
 
     utterance.onend = () => setIsAudioPlaying(false);
     utterance.onerror = () => setIsAudioPlaying(false);
-=======
-  // Featured vocabulary word of the day
-  const wordOfTheDay = VOCAB_WORDS.find((w) => w.id === "mango") || VOCAB_WORDS[0];
-
-  // Speech pronunciation helper
-  const speakText = (text: string, isWord = false) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-IN";
-    utterance.rate = isWord ? 0.8 : 0.88;
-
-    if (isWord) {
-      utterance.onstart = () => setIsSpeakingWord(true);
-      utterance.onend = () => setIsSpeakingWord(false);
-      utterance.onerror = () => setIsSpeakingWord(false);
-    } else {
-      utterance.onstart = () => setIsSpeakingSentence(true);
-      utterance.onend = () => setIsSpeakingSentence(false);
-      utterance.onerror = () => setIsSpeakingSentence(false);
-    }
->>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
 
     window.speechSynthesis.speak(utterance);
   };
 
-  // Speech Recognition (Mic Voice Evaluation)
-  const handleMicTest = (targetEnglish: string) => {
-    playSfx("pop");
+  // Playable Word Jumble Handlers
+  const handleSelectChip = (word: string, index: number) => {
+    SoundEffects.pop();
+    const newChips = [...availableChips];
+    newChips.splice(index, 1);
+    setAvailableChips(newChips);
+    setUserPlacedWords([...userPlacedWords, word]);
+    setJumbleFeedback(null);
+  };
+
+  const handleRemovePlacedWord = (word: string, index: number) => {
+    SoundEffects.pop();
+    const newPlaced = [...userPlacedWords];
+    newPlaced.splice(index, 1);
+    setUserPlacedWords(newPlaced);
+    setAvailableChips([...availableChips, word]);
+    setJumbleFeedback(null);
+  };
+
+  const handleResetJumble = () => {
+    SoundEffects.pop();
+    if (activeDay.game.scrambled) {
+      setAvailableChips([...activeDay.game.scrambled]);
+    } else {
+      setAvailableChips(activeDay.game.correctAnswer.split(" "));
+    }
+    setUserPlacedWords([]);
+    setJumbleFeedback(null);
+  };
+
+  const handleCheckJumble = () => {
+    const assembledString = userPlacedWords.join(" ").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    const targetString = activeDay.game.correctAnswer.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    if (assembledString === targetString) {
+      setJumbleFeedback("success");
+      setJumbleScore((prev) => Math.min(prev + 1, 5));
+      SoundEffects.success();
+      triggerConfetti();
+    } else {
+      setJumbleFeedback("retry");
+      SoundEffects.error();
+    }
+  };
+
+  // Speech Recognition Recorder
+  const handleStartSpeakingTest = () => {
+    SoundEffects.pop();
     const SpeechRecognition =
       (window as unknown as { SpeechRecognition: any }).SpeechRecognition ||
       (window as unknown as { webkitSpeechRecognition: any }).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      // Realistic fallback simulation for environments without Web Speech mic permissions
       setIsRecording(true);
       setTimeout(() => {
         setIsRecording(false);
-        setMicFeedback({
-          score: 95,
-          transcript: targetEnglish,
-          message: persona === "kids" ? "Superstar pronunciation! 🌟 +10 Stars" : "Clear intonation and cadence! +15 XP",
-        });
-        playSfx("success");
+        setMicRecognizedText(currentSentence?.english || "Hello, how are you?");
+        setMicScore(92);
+        SoundEffects.success();
         triggerConfetti();
-      }, 1300);
+      }, 1500);
       return;
     }
 
@@ -285,41 +341,28 @@ export default function Home() {
       recognition.onresult = (event: any) => {
         setIsRecording(false);
         const transcript = event.results[0][0].transcript;
-        const normalizedTarget = targetEnglish.toLowerCase().replace(/[^a-z0-9 ]/g, "");
-        const normalizedHeard = transcript.toLowerCase().replace(/[^a-z0-9 ]/g, "");
+        setMicRecognizedText(transcript);
 
-        const targetWords = normalizedTarget.split(" ");
-        const matched = targetWords.filter((w: string) => normalizedHeard.includes(w));
-        const matchRatio = matched.length / targetWords.length;
-        const isGood = matchRatio >= 0.5;
-        const score = Math.round(matchRatio * 100);
+        const targetWords = (currentSentence?.english || "").toLowerCase().replace(/[^a-z0-9 ]/g, "").split(" ");
+        const spoken = transcript.toLowerCase();
+        const matches = targetWords.filter((w) => spoken.includes(w));
+        const ratio = targetWords.length > 0 ? matches.length / targetWords.length : 0.8;
+        const calculatedScore = Math.max(Math.round(ratio * 100), 70);
+        setMicScore(calculatedScore);
 
-        setMicFeedback({
-          score: Math.max(score, 75),
-          transcript,
-          message: isGood
-            ? persona === "kids"
-              ? "Woohoo! Great reading! ⭐"
-              : "Clear pronunciation recognized!"
-            : "Good effort! Try pronouncing each word once more clearly.",
-        });
-
-        if (isGood) {
-          playSfx("success");
+        if (calculatedScore >= 75) {
+          SoundEffects.success();
           triggerConfetti();
         } else {
-          playSfx("error");
+          SoundEffects.error();
         }
       };
 
       recognition.onerror = () => {
         setIsRecording(false);
-        setMicFeedback({
-          score: 88,
-          transcript: targetEnglish,
-          message: "Good effort! Clear voice captured.",
-        });
-        playSfx("success");
+        setMicRecognizedText(currentSentence?.english || "Good voice clarity captured!");
+        setMicScore(85);
+        SoundEffects.success();
       };
 
       recognition.start();
@@ -328,1447 +371,1474 @@ export default function Home() {
     }
   };
 
-<<<<<<< HEAD
-  // Playable Word Jumble Handlers
-  const handleAddWord = (word: string, index: number) => {
-    playSfx("pop");
-    const newPool = [...poolWords];
-    newPool.splice(index, 1);
-    setPoolWords(newPool);
-    setUserSentence([...userSentence, word]);
-    setGameEvaluated(null);
-  };
-
-  const handleRemoveWord = (word: string, index: number) => {
-    playSfx("pop");
-    const newChosen = [...userSentence];
-    newChosen.splice(index, 1);
-    setUserSentence(newChosen);
-    setPoolWords([...poolWords, word]);
-    setGameEvaluated(null);
-  };
-
-  const handleResetJumble = () => {
-    playSfx("pop");
-    if (activeDay.game.scrambled) {
-      setPoolWords([...activeDay.game.scrambled]);
-    } else {
-      setPoolWords(activeDay.game.correctAnswer.split(" "));
-    }
-    setUserSentence([]);
-    setGameEvaluated(null);
-  };
-
-  const handleCheckJumble = () => {
-    const cleanUser = userSentence.join(" ").trim().toLowerCase().replace(/[.?!]/g, "");
-    const cleanTarget = activeDay.game.correctAnswer.trim().toLowerCase().replace(/[.?!]/g, "");
-
-    const isCorrect = cleanUser === cleanTarget;
-
-    if (isCorrect) {
-      setGameEvaluated("success");
-      playSfx("success");
-      triggerConfetti();
-    } else {
-      setGameEvaluated("retry");
-      playSfx("error");
-    }
-  };
-
   const triggerConfetti = async () => {
     try {
       const confettiMod = await import("canvas-confetti");
-      const confettiFn = confettiMod.default || confettiMod;
-      confettiFn({
-        particleCount: persona === "kids" ? 70 : 45,
-        spread: 70,
-        origin: { y: 0.65 },
-        colors:
-          persona === "kids"
-            ? ["#10B981", "#F59E0B", "#F43F5E", "#38BDF8", "#8B5CF6"]
-            : ["#6366F1", "#EC4899", "#3B82F6", "#10B981"],
+      const confetti = confettiMod.default || confettiMod;
+      confetti({
+        particleCount: 60,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ["#5145E5", "#10B981", "#F59E0B", "#38BDF8"],
       });
     } catch {
-      // confetti fallback
+      // fallback
     }
   };
 
-  // Handle Onboarding Completion
-  const handleCompleteDiagnostic = (recommendedLevel: DifficultyLevel, score: number) => {
-    setSelectedDifficulty(recommendedLevel);
-    setTestScore(score);
-    setFlowStep("course-dashboard");
-    try {
-      localStorage.setItem("speakeasy_onboarded", "true");
-      localStorage.setItem("speakeasy_persona", persona);
-      localStorage.setItem("speakeasy_level", recommendedLevel);
-    } catch {
-      // Storage fallback
-    }
-  };
+  const userName = profile?.displayName || "Rohan";
 
-  // Filtered Days
-  const filteredDays =
-    selectedPhaseFilter === "all"
-      ? COURSE_45_DAYS
-      : COURSE_45_DAYS.filter((d) => d.phaseId === selectedPhaseFilter);
+  // Filtered Roadmap Days
+  const filteredRoadmapDays = COURSE_45_DAYS.filter((d) => {
+    const matchesPhase = roadmapPhaseFilter === "all" || d.phaseId === roadmapPhaseFilter;
+    const matchesSearch =
+      !roadmapSearch.trim() ||
+      d.title.toLowerCase().includes(roadmapSearch.toLowerCase()) ||
+      d.hindiTitle.toLowerCase().includes(roadmapSearch.toLowerCase()) ||
+      `day ${d.day}`.includes(roadmapSearch.toLowerCase());
+    return matchesPhase && matchesSearch;
+  });
 
-  // Active sentences for chosen difficulty
-  const currentSentences: CourseSentence[] = activeDay.sentences[selectedDifficulty] || activeDay.sentences.easy;
-
-  // Visual Theme Classes
-  const getThemeClasses = () => {
-    switch (persona) {
-      case "kids":
-        return {
-          wrapper: "bg-amber-50/50 text-slate-800",
-          hero: "bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 text-white rounded-3xl shadow-xl shadow-orange-500/15 border-4 border-white",
-          heroCard: "bg-white/20 backdrop-blur-md rounded-2xl border-2 border-white/40",
-          card: "bg-white rounded-3xl border-2 border-amber-200/90 shadow-md hover:shadow-xl transition-all",
-          flashcard: "bg-gradient-to-br from-amber-50/90 via-white to-emerald-50/60 rounded-3xl border-3 border-emerald-300 shadow-xl",
-          primaryBtn: "bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:scale-102 active:scale-98 transition-transform",
-          badge: "bg-amber-400 text-amber-950 font-black rounded-full px-3 py-1",
-          activeTab: "bg-emerald-500 text-white font-black shadow-md",
-          tab: "bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200",
-          mascot: "🦉",
-          mascotName: "Chintu Owl",
-          tagLabel: "Kids Fun English",
-        };
-      case "teen":
-        return {
-          wrapper: "bg-zinc-950 text-zinc-100",
-          hero: "bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 text-white rounded-3xl shadow-2xl shadow-indigo-500/20 border border-white/20",
-          heroCard: "bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10",
-          card: "bg-zinc-900 rounded-2xl border border-zinc-800 shadow-xl hover:border-indigo-500/50 transition-all",
-          flashcard: "bg-gradient-to-b from-zinc-900 to-zinc-950 rounded-3xl border-2 border-indigo-500/50 shadow-2xl",
-          primaryBtn: "bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-zinc-950 font-black rounded-xl shadow-lg shadow-cyan-500/30",
-          badge: "bg-violet-500/20 text-violet-300 border border-violet-500/40 font-bold rounded-lg px-2.5 py-1",
-          activeTab: "bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-black shadow-lg",
-          tab: "bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold border border-zinc-800",
-          mascot: "🤖",
-          mascotName: "Nova AI",
-          tagLabel: "Gen-Z Fluency",
-        };
-      case "adult":
-      default:
-        return {
-          wrapper: "bg-slate-50 text-slate-900",
-          hero: "bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl shadow-md border border-slate-700",
-          heroCard: "bg-white/10 backdrop-blur-md rounded-xl border border-white/10",
-          card: "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all",
-          flashcard: "bg-white rounded-2xl border border-slate-200 shadow-md",
-          primaryBtn: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm hover:shadow transition",
-          badge: "bg-slate-100 text-slate-700 border border-slate-200 font-semibold rounded-md px-2.5 py-0.5",
-          activeTab: "bg-indigo-600 text-white font-bold shadow-sm",
-          tab: "bg-white hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200",
-          mascot: "👩‍🏫",
-          mascotName: "Language Mentor",
-          tagLabel: "Executive Fluency",
-        };
-    }
-  };
-
-  const theme = getThemeClasses();
-  const fontMultiplierClass = fontSize === "xlarge" ? "text-lg" : fontSize === "large" ? "text-base" : "text-sm";
-
-  // =========================================================================
-  // RENDER STEP 1: SPLASH SCREEN
-  // =========================================================================
-  if (flowStep === "splash") {
-    return (
-      <SplashScreen
-        onStart={() => {
-          playSfx("pop");
-          setFlowStep("persona-select");
-        }}
-        onSkipToDashboard={() => {
-          playSfx("pop");
-          setFlowStep("course-dashboard");
-        }}
-        hasPreviousSession={hasPreviousSession}
-      />
-    );
-  }
-
-  // =========================================================================
-  // RENDER STEP 2: PERSONA SELECTOR
-  // =========================================================================
-  if (flowStep === "persona-select") {
-    return (
-      <PersonaSelector
-        selectedPersona={persona}
-        onSelect={(chosen) => {
-          setPersona(chosen);
-          playSfx("pop");
-          setFlowStep("diagnostic-test");
-        }}
-        onBack={() => setFlowStep("splash")}
-      />
-    );
-  }
-
-  // =========================================================================
-  // RENDER STEP 3: DIAGNOSTIC ONBOARDING TEST
-  // =========================================================================
-  if (flowStep === "diagnostic-test") {
-    return (
-      <DiagnosticQuiz
-        persona={persona}
-        onComplete={handleCompleteDiagnostic}
-        onBack={() => setFlowStep("persona-select")}
-      />
-    );
-  }
-
-  // =========================================================================
-  // RENDER STEP 4: MAIN 45-DAY ORGANIZED LEARNING COURSE DASHBOARD
-  // =========================================================================
   return (
-    <div className={`min-h-screen ${theme.wrapper} transition-colors duration-300 flex flex-col font-sans ${fontMultiplierClass}`}>
+    <div className="min-h-screen bg-[#F4F7FC] dark:bg-[#0B1120] text-[#0F172A] py-6 px-4 sm:px-6 lg:px-8 transition-colors">
+      <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* ---------------------------------------------------------------------
-          1. UNIVERSAL TOP ACCESSIBILITY & PERSONA BAR
-          --------------------------------------------------------------------- */}
-      <div
-        className={`w-full py-2.5 px-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs border-b ${
-          persona === "teen" ? "bg-zinc-950 border-zinc-800 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-700"
-        }`}
-      >
-        {/* Left: Active Persona & Change Button */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-zinc-900 border border-current/10 font-bold shadow-sm">
-            <span className="text-base">{theme.mascot}</span>
-            <span>{theme.tagLabel}</span>
-          </div>
-
-          <button
-            onClick={() => {
-              playSfx("pop");
-              setFlowStep("persona-select");
-            }}
-            className="px-2.5 py-1 rounded-lg border border-current/20 hover:border-current/50 font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition"
-            title="Change learning demographic"
-          >
-            Switch Profile (लर्नर बदलें)
-          </button>
-
-          <button
-            onClick={() => {
-              playSfx("pop");
-              setFlowStep("diagnostic-test");
-            }}
-            className="px-2.5 py-1 rounded-lg border border-indigo-400/50 bg-indigo-50/20 text-indigo-600 dark:text-cyan-400 font-semibold flex items-center gap-1 transition"
-            title="Retake diagnostic level placement quiz"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Retake Level Test (लेवल टेस्ट दें)</span>
-          </button>
-        </div>
-
-        {/* Right: Accessibility Controls */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* Font Scaler */}
-          <div className="flex items-center rounded-lg bg-black/5 dark:bg-white/10 p-0.5 border border-current/10 font-bold">
-            <button
-              onClick={() => setFontSize("normal")}
-              className={`px-2 py-0.5 rounded ${fontSize === "normal" ? "bg-indigo-600 text-white" : "opacity-70 hover:opacity-100"}`}
-              title="Standard Font Size"
-            >
-              A
-            </button>
-            <button
-              onClick={() => setFontSize("large")}
-              className={`px-2 py-0.5 rounded ${fontSize === "large" ? "bg-indigo-600 text-white" : "opacity-70 hover:opacity-100"}`}
-              title="Large Font Size (Senior Inclusive)"
-            >
-              A+
-            </button>
-            <button
-              onClick={() => setFontSize("xlarge")}
-              className={`px-2 py-0.5 rounded ${fontSize === "xlarge" ? "bg-indigo-600 text-white" : "opacity-70 hover:opacity-100"}`}
-              title="Extra Large Font Size"
-            >
-              A++
-            </button>
-          </div>
-
-          {/* Slow Speech Rate Toggle */}
-          <button
-            onClick={() => {
-              setSpeechRate((r) => (r === 1.0 ? 0.75 : 1.0));
-              playSfx("pop");
-            }}
-            className={`px-2.5 py-1 rounded-lg border font-semibold flex items-center gap-1.5 transition ${
-              speechRate === 0.75
-                ? "bg-amber-500 text-slate-950 border-amber-400 font-bold"
-                : "border-current/20 hover:border-current/50"
-            }`}
-            title="Slow down speech pronunciation"
-          >
-            <Headphones className="w-3.5 h-3.5" />
-            <span>Speed: {speechRate}x {speechRate === 0.75 && "(Slow)"}</span>
-          </button>
-
-          {/* Bilingual Scaffolding Toggle */}
-          <button
-            onClick={() => {
-              setBilingual((b) => !b);
-              playSfx("pop");
-            }}
-            className={`px-2.5 py-1 rounded-lg border font-semibold flex items-center gap-1.5 ${
-              bilingual ? "border-indigo-400/50 bg-indigo-50/20 text-current" : "border-current/20 opacity-60"
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>{bilingual ? "EN + हिन्दी" : "English Only"}</span>
-          </button>
-
-          {/* Sound FX Toggle */}
-          <button
-            onClick={() => setSoundEnabled((s) => !s)}
-            className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 opacity-80 hover:opacity-100"
-            title={soundEnabled ? "Mute SFX" : "Enable SFX"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-500" /> : <VolumeX className="w-4 h-4 text-rose-500" />}
-          </button>
-        </div>
-      </div>
-
-      {/* ---------------------------------------------------------------------
-          2. MAIN DASHBOARD CONTAINER
-          --------------------------------------------------------------------- */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 flex-grow w-full">
-
-        {/* ----------------- A. HERO COURSE PROGRESS BANNER ----------------- */}
-        <section className={`relative p-6 sm:p-8 ${theme.hero} overflow-hidden transition-all duration-300`}>
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        {/* ===================================================================
+            VIEW 1: HOME DASHBOARD (100% Pixel-Perfect Match to Reference Design)
+            =================================================================== */}
+        {currentView === "dashboard" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
             
-            {/* Left 8 Cols: Course Status */}
-            <div className="lg:col-span-8 space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-white/20 border border-white/30 text-white font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider">
-                  Phase {activeDay.phaseId}: {activeDay.phaseName}
-                </span>
-                <span className="bg-white/30 text-white text-xs font-bold px-2.5 py-0.5 rounded-md">
-                  Day {activeDay.day} of 45
-                </span>
-              </div>
-
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-                {activeDay.title}
-              </h1>
-
-              {bilingual && (
-                <p className="text-xl sm:text-2xl font-black text-amber-200 font-hindi drop-shadow">
-                  {activeDay.hindiTitle}
-                </p>
-              )}
-
-              <p className="text-sm sm:text-base opacity-90 max-w-xl font-medium">
-                {activeDay.summary}
-              </p>
-
-              {/* Progress Bar Container */}
-              <div className={`p-4 ${theme.heroCard} space-y-2 max-w-lg mt-2`}>
-                <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
-                  <span>Course Progress (45 Days Track)</span>
-                  <span>{Math.round((activeDay.day / 45) * 100)}% Complete</span>
+            {/* =========================================================
+                2-LEVEL SWITCH / SPLIT ARCHITECTURE
+                Level 1: Category Switcher (Kids 🧒 / Teenager 🎒 / Adult 💼)
+                Level 2: Section Switcher (📖 1. Learning vs 🎯 2. Mixed Practice)
+                ========================================================= */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-[#E2E8F0] dark:border-slate-800 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] space-y-4">
+              
+              {/* Row 1: Level 1 - Category Switcher + Day Quick-Selector */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                
+                {/* Level 1 Category Tabs */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+                      Level 1 • Target Category
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-[#4F46E5] dark:text-indigo-300 font-bold">
+                      {profile.ageGroup === "kids" ? "🧒 5-12 yr (Phonics & Fun)" : profile.ageGroup === "teens" ? "🎒 13-18 yr (School & Social)" : "💼 19+ yr (Career & Fluency)"}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1.5 p-1 bg-[#F1F5F9] dark:bg-slate-800/80 rounded-2xl w-fit">
+                    {(
+                      [
+                        { id: "kids", label: "Kids", icon: "🧒" },
+                        { id: "teens", label: "Teenager", icon: "🎒" },
+                        { id: "adults", label: "Adult", icon: "💼" },
+                      ] as const
+                    ).map((cat) => {
+                      const isActive = profile.ageGroup === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            setAgeGroup(cat.id);
+                            SoundEffects.pop();
+                            speakText(`Switched to ${cat.label} English course`);
+                          }}
+                          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                            isActive
+                              ? "bg-white dark:bg-slate-900 text-[#4F46E5] dark:text-indigo-300 shadow-sm scale-102"
+                              : "text-[#64748B] dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-white"
+                          }`}
+                        >
+                          <span className="text-base">{cat.icon}</span>
+                          <span>{cat.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="w-full bg-black/20 rounded-full h-3 overflow-hidden p-0.5">
-                  <div
-                    className="h-2 rounded-full bg-emerald-400 transition-all duration-700"
-                    style={{ width: `${(activeDay.day / 45) * 100}%` }}
-                  />
+
+                {/* Day Stepper Selector (Lets user test Day 1 vs Day 2 vs Day 7 cumulative mix!) */}
+                <div className="flex items-center gap-3 self-start md:self-center">
+                  <div className="text-right hidden sm:block">
+                    <span className="text-[11px] font-bold text-[#64748B] dark:text-slate-400 block">
+                      Active Curriculum Day
+                    </span>
+                    <span className="text-xs font-extrabold text-[#0F172A] dark:text-white">
+                      Day {activeDayNumber} of 45
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1 bg-[#F8FAFC] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 rounded-2xl p-1">
+                    <button
+                      type="button"
+                      disabled={activeDayNumber <= 1}
+                      onClick={() => {
+                        setActiveDayNumber((prev) => Math.max(1, prev - 1));
+                        SoundEffects.pop();
+                      }}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-white dark:hover:bg-slate-700 disabled:opacity-40 transition font-bold"
+                      title="Previous Day"
+                    >
+                      ‹
+                    </button>
+
+                    <span className="px-3 text-xs font-black text-[#4F46E5] dark:text-indigo-400">
+                      Day {activeDayNumber}
+                    </span>
+
+                    <button
+                      type="button"
+                      disabled={activeDayNumber >= 45}
+                      onClick={() => {
+                        setActiveDayNumber((prev) => Math.min(45, prev + 1));
+                        SoundEffects.pop();
+                      }}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-white dark:hover:bg-slate-700 disabled:opacity-40 transition font-bold"
+                      title="Next Day"
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Divider */}
+              <div className="h-px bg-[#E2E8F0] dark:bg-slate-800" />
+
+              {/* Row 2: Level 2 - Section Switcher (1. Learning vs 2. Mixed Practice) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#64748B] dark:text-slate-400 block">
+                    Level 2 • Section Split
+                  </span>
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium">
+                    {dashboardMode === "learning"
+                      ? "📖 Structured day-by-day lesson material, dialogues & reading."
+                      : `🎯 Cumulative Leitner Spiral: Mixing today's Day ${activeDayNumber} with past learned days (Days 1–${activeDayNumber})!`}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 p-1 bg-[#EEF2FF] dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl shrink-0">
+                  {/* Mode 1: Learning */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDashboardMode("learning");
+                      SoundEffects.pop();
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                      dashboardMode === "learning"
+                        ? "bg-white dark:bg-slate-900 text-[#4F46E5] dark:text-indigo-300 shadow-sm font-black"
+                        : "text-[#64748B] dark:text-slate-400 hover:text-[#4F46E5]"
+                    }`}
+                  >
+                    <span>📖</span>
+                    <span>1. Learning (सिखें)</span>
+                  </button>
+
+                  {/* Mode 2: Mixed Practice */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDashboardMode("practice");
+                      SoundEffects.pop();
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all relative ${
+                      dashboardMode === "practice"
+                        ? "bg-[#4F46E5] text-white shadow-md font-black"
+                        : "text-[#64748B] dark:text-slate-400 hover:text-[#4F46E5]"
+                    }`}
+                  >
+                    <span>🎯</span>
+                    <span>2. Mixed Practice (अभ्यास)</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                      dashboardMode === "practice" ? "bg-white/20 text-white" : "bg-[#10B981]/15 text-[#10B981]"
+                    }`}>
+                      {activeDayNumber === 1 ? "Day 1" : `Mix Day 1-${activeDayNumber}`}
+                    </span>
+                  </button>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setActiveTab("sentences");
-                    speakSentence(currentSentences[0]?.english || activeDay.title);
-                  }}
-                  className={`px-6 py-3 text-sm sm:text-base flex items-center gap-2 ${theme.primaryBtn}`}
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  <span>Start Today's Lesson (पाठ शुरू करें)</span>
-                </button>
-
-                <button
-                  onClick={() => setIsCertificateOpen(true)}
-                  className="px-5 py-3 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/25 font-bold text-xs sm:text-sm flex items-center gap-2 transition"
-                >
-                  <Award className="w-4 h-4 text-amber-300" />
-                  <span>View 45-Day Certificate 🎓</span>
-                </button>
-              </div>
             </div>
 
-            {/* Right 4 Cols: Mascot & Daily Stats Widget */}
-            <div className="lg:col-span-4 flex flex-col items-center justify-center">
-              <div className={`w-full p-5 ${theme.heroCard} text-center space-y-3`}>
-                <div className="relative inline-block">
-                  <div className="w-20 h-20 rounded-2xl bg-white/20 border-2 border-white/40 mx-auto flex items-center justify-center text-5xl shadow-lg animate-pulse">
-                    {activeDay.icon}
+            {/* Sub-View Switch based on Level 2 Selection */}
+            {dashboardMode === "learning" ? (
+              <div className="space-y-6 animate-in fade-in duration-150">
+                {/* Top Grid: Welcome Greeting Card (Left) & Today's Learning Mission Banner (Right) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              
+              {/* Left Card: Welcome & Scholar Owl Mascot (4 Cols / approx 36%) */}
+              <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-[#E2E8F0] dark:border-slate-800 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden group">
+                {/* Top Left Diamond Accent */}
+                <div className="absolute top-5 left-5 text-[#C7D2FE] dark:text-indigo-900 pointer-events-none">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
+                  </svg>
+                </div>
+
+                <div className="pt-3 space-y-1 relative z-10">
+                  <div className="flex items-center justify-between gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-white tracking-tight">
+                      Hello {userName}!
+                    </h1>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOnboardingInitialPhase("onboarding");
+                        setIsOnboardingOpen(true);
+                      }}
+                      className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-[#4F46E5] dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition flex items-center gap-1 shadow-2xs shrink-0"
+                      title="Switch learner profile & purpose (Kids / Teenager / Adult)"
+                    >
+                      <span>
+                        {profile.ageGroup === "kids" ? "🧒 Kids" : profile.ageGroup === "teens" ? "🎒 Teen" : "💼 Adult"}
+                      </span>
+                      <span className="text-[10px] text-slate-400">▾</span>
+                    </button>
                   </div>
-                  <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-white">
-                    Day {activeDay.day}
+                  <p className="text-xs sm:text-sm text-[#64748B] dark:text-slate-400 font-medium leading-relaxed">
+                    Ready to practice your English today?
+                  </p>
+                </div>
+
+                {/* Mascot Graphic with Speech Bubble */}
+                <div className="pt-6 flex items-end justify-between gap-3 relative z-10">
+                  {/* Chintu Scholar Owl */}
+                  <div 
+                    onClick={() => speakText("Small steps every day lead to big results! You can do it!")}
+                    className="shrink-0 cursor-pointer transition-transform hover:scale-105 active:scale-95 duration-200"
+                    title="Click Chintu to hear motivation!"
+                  >
+                    <ScholarOwl className="w-24 h-26 sm:w-28 sm:h-28 drop-shadow-sm" />
+                  </div>
+
+                  {/* Speech Bubble pointing to the owl */}
+                  <div 
+                    onClick={() => speakText("Small steps every day lead to big results! You can do it!")}
+                    className="relative bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 rounded-2xl p-3.5 text-xs font-semibold text-[#1E293B] dark:text-slate-200 shadow-xs max-w-[200px] leading-relaxed cursor-pointer hover:border-indigo-300 transition-colors"
+                  >
+                    {/* Tail pointing to the owl on the left */}
+                    <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-r-[8px] border-r-white dark:border-r-slate-800 z-10" />
+                    <div className="absolute top-1/2 -left-[9px] -translate-y-1/2 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[9px] border-r-[#E2E8F0] dark:border-r-slate-700" />
+                    Small steps every day lead to big results!{" "}
+                    <span className="font-bold text-[#0F172A] dark:text-white">You can do it!</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Card: Today's Learning Mission (8 Cols / approx 64%) */}
+              <div className="lg:col-span-8 bg-gradient-to-r from-[#4F46E5] via-[#3B82F6] to-[#06B6D4] rounded-3xl p-5 sm:p-6 shadow-md flex flex-col justify-between relative overflow-hidden text-white">
+                {/* Top bar inside gradient */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs font-bold relative z-10">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white">
+                      <Sparkles size={14} />
+                    </div>
+                    <span className="font-bold text-sm tracking-tight">Today's Learning Mission</span>
+                    <span className="px-3 py-0.5 rounded-full bg-white/20 backdrop-blur-xs text-white text-xs font-bold">
+                      Day {activeDay.day} of 45
+                    </span>
+                  </div>
+                  <span className="px-3.5 py-0.5 rounded-full bg-white/20 backdrop-blur-xs text-white text-xs font-bold ml-auto">
+                    Phase {activeDay.phaseId}: {activeDay.phaseName}
                   </span>
                 </div>
 
-                <div>
-                  <h3 className="font-black text-lg">{theme.mascotName}</h3>
-                  <p className="text-xs opacity-80 font-medium">Daily Coach Companion</p>
-                </div>
+                {/* Floating white inner card */}
+                <div className="mt-4 bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-xl relative z-10 grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                  {/* Left Content (md:col-span-8) */}
+                  <div className="md:col-span-8 space-y-2">
+                    <div className="space-y-0.5">
+                      <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">
+                        Lesson {activeDay.day}: {activeDay.title}
+                      </h2>
+                      <p className="text-sm font-semibold text-[#475569] dark:text-slate-400 font-hindi">
+                        ({activeDay.hindiTitle})
+                      </p>
+                    </div>
 
-                <div className="p-3 rounded-xl bg-black/20 text-xs font-semibold leading-relaxed">
-                  "Day {activeDay.day} will make you speak English with absolute confidence! Listen, read, and play the word game!"
-                </div>
+                    <p className="text-xs sm:text-sm text-[#64748B] dark:text-slate-400 font-medium leading-relaxed max-w-md">
+                      {activeDay.summary}
+                    </p>
 
-                <div className="flex items-center justify-around pt-1 text-xs font-black">
-                  <div className="flex items-center gap-1 text-amber-300">
-                    <Star className="w-4 h-4 fill-amber-300" />
-                    <span>+{activeDay.targetStars} Stars</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-orange-300">
-                    <Flame className="w-4 h-4 fill-orange-400" />
-                    <span>{profile?.streakCount || 6} Day Streak</span>
-                  </div>
-                </div>
+                    {/* Meta row: Time, Progress Bar, and CTA */}
+                    <div className="pt-3 flex flex-wrap items-center gap-4 sm:gap-6">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#64748B] dark:text-slate-400">
+                        <Clock size={15} />
+                        <span>~ 15 min</span>
+                      </div>
 
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ----------------- B. 45-DAY ROADMAP & PHASE FILTER ----------------- */}
-        <section className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className={theme.badge}>45-Day Track</span>
-                <h2 className="text-2xl font-black tracking-tight">
-                  Learning Roadmap (दैनिक पाठ सूची)
-                </h2>
-              </div>
-              <p className="text-xs sm:text-sm opacity-70 mt-1">
-                Click any day to jump directly into its sentences, story, and interactive game.
-              </p>
-            </div>
-
-            {/* Quick Next/Prev Day Arrows */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  if (activeDayNumber > 1) {
-                    setActiveDayNumber(activeDayNumber - 1);
-                    playSfx("pop");
-                  }
-                }}
-                disabled={activeDayNumber <= 1}
-                className="p-2 rounded-xl border border-current/20 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                title="Previous Day"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="text-xs font-extrabold px-3 py-1 rounded-lg bg-black/5 dark:bg-white/10">
-                Day {activeDayNumber} / 45
-              </span>
-              <button
-                onClick={() => {
-                  if (activeDayNumber < 45) {
-                    setActiveDayNumber(activeDayNumber + 1);
-                    playSfx("pop");
-                  }
-                }}
-                disabled={activeDayNumber >= 45}
-                className="p-2 rounded-xl border border-current/20 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                title="Next Day"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Phase Filter Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs font-extrabold">
-            <button
-              onClick={() => {
-                setSelectedPhaseFilter("all");
-                playSfx("pop");
-              }}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap transition ${
-                selectedPhaseFilter === "all" ? "bg-indigo-600 text-white shadow-md" : "bg-white dark:bg-zinc-900 border border-current/10 opacity-75 hover:opacity-100"
-              }`}
-            >
-              All 45 Days (सभी 45 दिन)
-            </button>
-
-            {COURSE_PHASES.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => {
-                  setSelectedPhaseFilter(p.id);
-                  playSfx("pop");
-                }}
-                className={`px-3.5 py-2 rounded-xl whitespace-nowrap flex items-center gap-1.5 transition ${
-                  selectedPhaseFilter === p.id
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "bg-white dark:bg-zinc-900 border border-current/10 opacity-75 hover:opacity-100"
-                }`}
-              >
-                <span>{p.icon}</span>
-                <span>Phase {p.id}: {p.name}</span>
-                <span className="opacity-70 text-[10px]">({p.days})</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Horizontal / Grid Day Selector Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2.5 max-h-56 overflow-y-auto p-1">
-            {filteredDays.map((d) => {
-              const isActive = d.day === activeDayNumber;
-              const isPast = d.day < activeDayNumber;
-              return (
-                <button
-                  key={d.day}
-                  onClick={() => {
-                    setActiveDayNumber(d.day);
-                    playSfx("pop");
-                  }}
-                  className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-between gap-1 ${
-                    isActive
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-lg scale-102 ring-2 ring-indigo-400"
-                      : isPast
-                      ? "bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-300/80 text-emerald-950 dark:text-emerald-300 hover:shadow"
-                      : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:border-indigo-400"
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full text-[10px] font-black opacity-80">
-                    <span>Day {d.day}</span>
-                    <span>{isPast ? "✓" : isActive ? "★" : ""}</span>
-                  </div>
-                  <span className="text-xl my-0.5">{d.icon}</span>
-                  <p className="text-[11px] font-bold truncate w-full leading-tight">
-                    {d.title}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ----------------- C. ACTIVE DAY LEARNING STUDIO (3 ORGANIZED MODULES) ----------------- */}
-        <section className={`p-6 sm:p-8 ${theme.card} space-y-6`}>
-          
-          {/* Day Header & Difficulty Selector */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-current/10">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-600 text-white">
-                  Day {activeDay.day} Studio
-                </span>
-                <span className="text-2xl">{activeDay.icon}</span>
-                <h3 className="text-2xl font-black">{activeDay.title}</h3>
-              </div>
-              {bilingual && (
-                <p className="text-base font-bold text-indigo-600 dark:text-cyan-400 font-hindi">
-                  {activeDay.hindiTitle}
-                </p>
-              )}
-            </div>
-
-            {/* Difficulty Level Switcher (Easy / Medium / Hard) */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black opacity-70 uppercase tracking-wider mr-1 hidden sm:inline">
-                Difficulty:
-              </span>
-              <div className="flex bg-black/5 dark:bg-white/10 p-1 rounded-2xl gap-1 text-xs font-black">
-                <button
-                  onClick={() => {
-                    setSelectedDifficulty("easy");
-                    playSfx("pop");
-                  }}
-                  className={`px-3 py-1.5 rounded-xl transition ${
-                    selectedDifficulty === "easy"
-                      ? "bg-emerald-500 text-white shadow"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  🟢 Easy (शुरुआती)
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedDifficulty("medium");
-                    playSfx("pop");
-                  }}
-                  className={`px-3 py-1.5 rounded-xl transition ${
-                    selectedDifficulty === "medium"
-                      ? "bg-amber-500 text-slate-950 shadow"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  🟡 Medium (मध्यम)
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedDifficulty("hard");
-                    playSfx("pop");
-                  }}
-                  className={`px-3 py-1.5 rounded-xl transition ${
-                    selectedDifficulty === "hard"
-                      ? "bg-rose-500 text-white shadow"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  🔴 Hard (कठिन)
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 3 Organized Learning Activity Tabs */}
-          <div className="grid grid-cols-3 gap-2 p-1.5 bg-black/5 dark:bg-white/5 rounded-2xl font-black text-xs sm:text-sm">
-            <button
-              onClick={() => {
-                setActiveTab("sentences");
-                playSfx("pop");
-              }}
-              className={`py-3 rounded-xl flex items-center justify-center gap-2 transition ${
-                activeTab === "sentences" ? theme.activeTab : theme.tab
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>1. Sentences (वाक्य अभ्यास)</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTab("reading");
-                playSfx("pop");
-              }}
-              className={`py-3 rounded-xl flex items-center justify-center gap-2 transition ${
-                activeTab === "reading" ? theme.activeTab : theme.tab
-              }`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>2. Reading Corner (कहानी व संवाद)</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTab("games");
-                playSfx("pop");
-              }}
-              className={`py-3 rounded-xl flex items-center justify-center gap-2 transition ${
-                activeTab === "games" ? theme.activeTab : theme.tab
-              }`}
-            >
-              <Gamepad2 className="w-4 h-4" />
-              <span>3. Game Lab (खेल-खेल में सीखें)</span>
-            </button>
-          </div>
-
-          {/* ----------------- TAB 1: DAILY SENTENCES MODULE ----------------- */}
-          {activeTab === "sentences" && (
-            <div className="space-y-6 pt-2">
-              <div className="flex items-center justify-between text-xs font-bold opacity-75">
-                <span>
-                  Showing {currentSentences.length} sentences for <span className="uppercase font-black">{selectedDifficulty}</span> level.
-                </span>
-                <span>Listen carefully and tap microphone to practice speech.</span>
-              </div>
-
-              {/* Sentences List */}
-              <div className="space-y-4">
-                {currentSentences.map((s, idx) => (
-                  <div
-                    key={idx}
-                    className="p-5 rounded-2xl border border-current/10 bg-black/[0.02] dark:bg-white/[0.02] hover:border-indigo-400 transition-all space-y-3"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-cyan-400">
-                          Sentence {idx + 1}:
+                      <div className="flex items-center gap-2 flex-1 min-w-[140px] max-w-xs">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shrink-0" />
+                        <div className="w-full bg-[#F1F5F9] dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-[#10B981] h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.round((activeDay.day / 45) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-[#64748B] dark:text-slate-400 shrink-0">
+                          {Math.round((activeDay.day / 45) * 100)}% complete
                         </span>
-                        {/* Hindi Prompt */}
-                        <p className="text-xl sm:text-2xl font-black font-hindi text-slate-900 dark:text-white">
-                          {s.hindi}
-                        </p>
-                        {/* English Target */}
-                        <p className="text-lg sm:text-xl font-black text-indigo-700 dark:text-cyan-300">
-                          {s.english}
-                        </p>
-                        {/* Hindi Phonetics Guide */}
-                        <div className="pt-1 flex items-baseline gap-2 text-xs font-semibold">
-                          <span className="opacity-60 text-[11px]">उच्चारण (Phonetics):</span>
-                          <span className="font-extrabold text-slate-800 dark:text-zinc-200 font-hindi text-sm">
-                            "{s.phonetic}"
-                          </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setCurrentView("lesson-studio");
+                            setStudioTab("sentences");
+                          }}
+                          className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-indigo-500/25 active:scale-95 transition-all hover:scale-102 shrink-0"
+                        >
+                          <span>Continue Learning</span>
+                          <ArrowRight size={15} />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setDashboardMode("practice");
+                            SoundEffects.pop();
+                          }}
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold text-xs sm:text-sm shadow-2xs active:scale-95 transition-all shrink-0"
+                          title="Practice Day mixed with past review items"
+                        >
+                          <span>🎯 Mixed Practice (Spiral)</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Illustration: Conversation Illustration (md:col-span-4) */}
+                  <div className="md:col-span-4 flex items-center justify-center">
+                    <ConversationIllustration className="w-full h-auto max-w-[200px]" />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Bottom Row: Split Left (approx 68% - 8 Cols) & Right (approx 32% - 4 Cols) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* Left Column (8 Cols): Day 1 Progressive 4-Stage Studio or Standard Plan */}
+              <div className="lg:col-span-8 space-y-6">
+                {profile.ageGroup === "kids" ? (
+                  <Day1ProgressiveQuestStudio
+                    dayNumber={activeDayNumber}
+                    onSelectDay={(day) => setActiveDayNumber(day)}
+                    onCompleteDay1={() => setActiveDayNumber((prev) => Math.min(45, prev + 1))}
+                    onOpenSentencesStudio={() => {
+                      setCurrentView("lesson-studio");
+                      setStudioTab("sentences");
+                    }}
+                  />
+                ) : (
+                  <>
+                    {/* 1. Today's Learning Plan */}
+                    <div className="space-y-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#0F172A] dark:text-white">
+                      Today's Learning Plan
+                    </h3>
+                    <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium">
+                      Complete these activities to make steady progress.
+                    </p>
+                  </div>
+
+                  {/* 3 Action Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    
+                    {/* Card 1: Learn 5 Useful Sentences */}
+                    <div
+                      onClick={() => {
+                        setCurrentView("lesson-studio");
+                        setStudioTab("sentences");
+                      }}
+                      className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all cursor-pointer flex flex-col justify-between h-40 group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-6 h-6 rounded-full bg-[#10B981] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                          1
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-[#DCFCE7] dark:bg-emerald-950/60 text-[#10B981] flex items-center justify-center shrink-0">
+                          <Sprout size={18} />
                         </div>
                       </div>
 
-                      {/* Controls: Audio Speaker & Microphone */}
-                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                        {/* Audio Speaker Button */}
-                        <button
-                          onClick={() => speakSentence(s.english)}
-                          className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 hover:scale-105 active:scale-95 shadow-md transition"
-                          title="Listen to native audio pronunciation"
-                        >
-                          <Volume2 className="w-5 h-5" />
-                        </button>
-
-                        {/* Speech Mic Button */}
-                        <button
-                          onClick={() => handleMicTest(s.english)}
-                          disabled={isRecording}
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md transition ${
-                            isRecording ? "bg-rose-500 animate-pulse" : "bg-slate-800 hover:bg-slate-900 hover:scale-105 active:scale-95"
-                          }`}
-                          title="Click and speak this sentence to test your pronunciation"
-                        >
-                          {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Mic Feedback Toast */}
-              {micFeedback && (
-                <div
-                  className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-all ${
-                    micFeedback.score >= 80
-                      ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-800 dark:text-emerald-300"
-                      : "bg-amber-500/10 border-amber-500/40 text-amber-800 dark:text-amber-300"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg ${
-                        micFeedback.score >= 80 ? "bg-emerald-500 text-white" : "bg-amber-500 text-white"
-                      }`}
-                    >
-                      {micFeedback.score >= 80 ? <Check className="w-6 h-6" /> : <RefreshCw className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm">{micFeedback.message}</h4>
-                      <p className="text-xs opacity-80">We heard: "{micFeedback.transcript}"</p>
-                    </div>
-                  </div>
-                  <span className="text-xl font-black">{micFeedback.score}%</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ----------------- TAB 2: READING CORNER MODULE ----------------- */}
-          {activeTab === "reading" && (
-            <div className="space-y-6 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
-                <div>
-                  <h4 className="text-xl font-black">{activeDay.reading.title}</h4>
-                  <p className="text-xs font-bold text-indigo-600 dark:text-cyan-400 font-hindi">
-                    {activeDay.reading.hindiTitle}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => speakSentence(activeDay.reading.storyEn)}
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-2 hover:bg-indigo-700 shadow transition self-start sm:self-center"
-                >
-                  <Volume2 className="w-4 h-4" />
-                  <span>Listen to Story (कहानी सुनें)</span>
-                </button>
-              </div>
-
-              {/* Bilingual Story Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* English Story Box */}
-                <div className="p-6 rounded-2xl bg-indigo-50/50 dark:bg-zinc-800/50 border border-indigo-200 dark:border-zinc-700 space-y-2">
-                  <span className="text-xs font-black uppercase text-indigo-600 dark:text-cyan-400 block">
-                    English Story Passage:
-                  </span>
-                  <p className="text-base sm:text-lg font-medium leading-relaxed">
-                    {activeDay.reading.storyEn}
-                  </p>
-                </div>
-
-                {/* Hindi Story Box */}
-                <div className="p-6 rounded-2xl bg-amber-50/50 dark:bg-zinc-800/50 border border-amber-200 dark:border-zinc-700 space-y-2">
-                  <span className="text-xs font-black uppercase text-amber-700 dark:text-amber-400 block">
-                    हिंदी अनुवाद:
-                  </span>
-                  <p className="text-base sm:text-lg font-medium leading-relaxed font-hindi text-slate-800 dark:text-zinc-200">
-                    {activeDay.reading.storyHi}
-                  </p>
-                </div>
-              </div>
-
-              {/* Vocabulary Highlights */}
-              <div className="space-y-3 pt-2">
-                <span className="text-xs font-black uppercase tracking-wider opacity-70 block">
-                  Key Vocabulary Words (महत्वपूर्ण शब्द):
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {activeDay.reading.vocabWords.map((v, i) => (
-                    <div
-                      key={i}
-                      className="p-3.5 rounded-xl border border-current/10 bg-white dark:bg-zinc-900 flex items-center justify-between"
-                    >
                       <div>
-                        <p className="font-black text-sm text-indigo-600 dark:text-cyan-400">{v.word}</p>
-                        <p className="text-xs font-semibold font-hindi text-slate-700 dark:text-zinc-300">{v.meaning}</p>
-                        <p className="text-[10px] opacity-60 font-hindi">"{v.phonetic}"</p>
+                        <h4 className="font-bold text-sm text-[#0F172A] dark:text-white leading-snug group-hover:text-emerald-600 transition-colors">
+                          Learn 5 Useful Sentences
+                        </h4>
                       </div>
-                      <button
-                        onClick={() => speakSentence(v.word)}
-                        className="p-2 rounded-lg bg-current/5 hover:bg-current/15"
-                        title="Pronounce Word"
-                      >
-                        <Volume2 className="w-3.5 h-3.5" />
-                      </button>
+
+                      <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-slate-400 pt-1">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <span className="w-2 h-2 rounded-full border-2 border-[#10B981]" />
+                          0/5 completed
+                        </span>
+                        <ArrowRight size={14} className="text-slate-400 group-hover:text-[#10B981] group-hover:translate-x-1 transition-all" />
+                      </div>
                     </div>
-                  ))}
+
+                    {/* Card 2: Listen to a Short Dialogue */}
+                    <div
+                      onClick={() => {
+                        setCurrentView("lesson-studio");
+                        setStudioTab("reading");
+                      }}
+                      className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer flex flex-col justify-between h-40 group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-6 h-6 rounded-full bg-[#2563EB] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                          2
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-[#DBEAFE] dark:bg-blue-950/60 text-[#2563EB] flex items-center justify-center shrink-0">
+                          <Headphones size={18} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-bold text-sm text-[#0F172A] dark:text-white leading-snug group-hover:text-blue-600 transition-colors">
+                          Listen to a Short Dialogue
+                        </h4>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-slate-400 pt-1">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                          0/1 completed
+                        </span>
+                        <ArrowRight size={14} className="text-slate-400 group-hover:text-[#2563EB] group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </div>
+
+                    {/* Card 3: Play Vocabulary Game */}
+                    <div
+                      onClick={() => {
+                        setCurrentView("lesson-studio");
+                        setStudioTab("games");
+                      }}
+                      className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 transition-all cursor-pointer flex flex-col justify-between h-40 group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-6 h-6 rounded-full bg-[#F59E0B] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                          4
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-[#FEF3C7] dark:bg-amber-950/60 text-[#D97706] flex items-center justify-center shrink-0">
+                          <Gamepad2 size={18} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-bold text-sm text-[#0F172A] dark:text-white leading-snug group-hover:text-amber-600 transition-colors">
+                          Play Vocabulary Game
+                        </h4>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-slate-400 pt-1">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <span className="w-2 h-2 rounded-full border border-slate-300 dark:border-slate-600" />
+                          0/1 completed
+                        </span>
+                        <ArrowRight size={14} className="text-slate-400 group-hover:text-[#F59E0B] group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
+
+                {/* 2. Quick Practice (4 Pastel Cards) */}
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#0F172A] dark:text-white">
+                      Quick Practice
+                    </h3>
+                    <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium">
+                      Short activities, big improvement!
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    {/* Card 1: Speak & Repeat (Pink Pastel) */}
+                    <div
+                      onClick={() => setCurrentView("speak-repeat")}
+                      className="bg-[#FFF1F2] dark:bg-rose-950/20 border border-[#FECDD3] dark:border-rose-900/40 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-9 h-9 rounded-full bg-[#E11D48] text-white flex items-center justify-center shadow-xs">
+                          <Mic size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#E11D48] transition-colors">
+                          Speak & Repeat
+                        </h4>
+                        <p className="text-xs text-[#64748B] dark:text-slate-400 leading-relaxed font-medium">
+                          Improve your pronunciation and speaking confidence.
+                        </p>
+                      </div>
+                      <div className="pt-3 flex justify-end">
+                        <span className="text-xs font-bold text-[#E11D48] group-hover:translate-x-1 transition-transform">
+                          →
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card 2: Word Games (Blue Pastel) */}
+                    <Link
+                      href="/play"
+                      className="bg-[#F0F9FF] dark:bg-sky-950/20 border border-[#BAE6FD] dark:border-sky-900/40 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-9 h-9 rounded-full bg-[#0284C7] text-white flex items-center justify-center shadow-xs">
+                          <Gamepad2 size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#0284C7] transition-colors">
+                          Word Games
+                        </h4>
+                        <p className="text-xs text-[#64748B] dark:text-slate-400 leading-relaxed font-medium">
+                          Learn through fun interactive games.
+                        </p>
+                      </div>
+                      <div className="pt-3 flex justify-end">
+                        <span className="text-xs font-bold text-[#0284C7] group-hover:translate-x-1 transition-transform">
+                          →
+                        </span>
+                      </div>
+                    </Link>
+
+                    {/* Card 3: Daily Vocabulary (Green Pastel) */}
+                    <Link
+                      href="/learn"
+                      className="bg-[#F0FDF4] dark:bg-emerald-950/20 border border-[#BBF7D0] dark:border-emerald-900/40 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-9 h-9 rounded-full bg-[#16A34A] text-white flex items-center justify-center shadow-xs">
+                          <BookOpen size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-[#16A34A] transition-colors">
+                          Daily Vocabulary
+                        </h4>
+                        <p className="text-xs text-[#64748B] dark:text-slate-400 leading-relaxed font-medium">
+                          Build your word power every day.
+                        </p>
+                      </div>
+                      <div className="pt-3 flex justify-end">
+                        <span className="text-xs font-bold text-[#16A34A] group-hover:translate-x-1 transition-transform">
+                          →
+                        </span>
+                      </div>
+                    </Link>
+
+                    {/* Card 4: Reading Corner (Amber Pastel) */}
+                    <div
+                      onClick={() => {
+                        setCurrentView("lesson-studio");
+                        setStudioTab("reading");
+                      }}
+                      className="bg-[#FFFBEB] dark:bg-amber-950/20 border border-[#FDE68A] dark:border-amber-900/40 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+                    >
+                      <div className="space-y-2">
+                        <div className="w-9 h-9 rounded-full bg-[#D97706] text-white flex items-center justify-center shadow-xs">
+                          <BookOpen size={18} />
+                        </div>
+                        <h4 className="font-bold text-sm text-[#92400E] dark:text-amber-300 group-hover:text-[#B45309] transition-colors">
+                          Reading Corner
+                        </h4>
+                        <p className="text-xs text-[#78350F] dark:text-amber-200/80 leading-relaxed font-medium">
+                          Stories, dialogues and real-life English.
+                        </p>
+                      </div>
+                      <div className="pt-3 flex justify-end">
+                        <span className="text-xs font-bold text-[#D97706] group-hover:translate-x-1 transition-transform">
+                          →
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </>
+            )}
+
+          </div>
+
+              {/* Right Column (4 Cols): Your Progress Snapshot Master Container */}
+              <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] space-y-5">
+                
+                {/* Top Header */}
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base text-[#0F172A] dark:text-white">
+                    Your Progress Snapshot
+                  </h3>
+                  <Link
+                    href="/progress"
+                    className="text-xs font-bold text-[#4F46E5] dark:text-indigo-400 hover:underline flex items-center gap-0.5"
+                  >
+                    <span>View Details</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+
+                {/* 3 Metric Tiles in a row */}
+                <div className="grid grid-cols-3 gap-2.5">
+                  {/* Streak */}
+                  <div className="p-2.5 rounded-2xl bg-[#FFFBEB] dark:bg-amber-950/30 border border-[#FEF3C7] dark:border-amber-800/40 flex flex-col items-center justify-center text-center">
+                    <Flame size={18} className="text-[#F59E0B] fill-[#F59E0B]" />
+                    <span className="text-base font-extrabold text-[#0F172A] dark:text-white mt-1">
+                      {profile.streakCount || 5}
+                    </span>
+                    <span className="text-[10px] text-[#64748B] dark:text-slate-400 font-semibold">
+                      Day Streak
+                    </span>
+                  </div>
+
+                  {/* XP Earned */}
+                  <div className="p-2.5 rounded-2xl bg-[#F0F9FF] dark:bg-blue-950/30 border border-[#E0F2FE] dark:border-blue-800/40 flex flex-col items-center justify-center text-center">
+                    <Star size={18} className="text-[#2563EB] fill-[#2563EB]" />
+                    <span className="text-base font-extrabold text-[#0F172A] dark:text-white mt-1">
+                      {profile.xp || 120}
+                    </span>
+                    <span className="text-[10px] text-[#64748B] dark:text-slate-400 font-semibold">
+                      XP Earned
+                    </span>
+                  </div>
+
+                  {/* Lessons Completed */}
+                  <div className="p-2.5 rounded-2xl bg-[#EEF2FF] dark:bg-indigo-950/30 border border-[#E0E7FF] dark:border-indigo-800/40 flex flex-col items-center justify-center text-center">
+                    <BookOpen size={18} className="text-[#6366F1]" />
+                    <span className="text-base font-extrabold text-[#0F172A] dark:text-white mt-1">
+                      6
+                    </span>
+                    <span className="text-[10px] text-[#64748B] dark:text-slate-400 font-semibold leading-tight">
+                      Lessons Completed
+                    </span>
+                  </div>
+                </div>
+
+                {/* Skills Progress & Chintu Owl side-by-side sub-section */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1 items-stretch">
+                  
+                  {/* Left: Skills Progress (7 cols) */}
+                  <div className="sm:col-span-7 space-y-2.5">
+                    <span className="text-xs font-bold text-[#0F172A] dark:text-white block">
+                      Skills Progress
+                    </span>
+
+                    {[
+                      { label: "Speaking", pct: 40, color: "bg-[#6366F1]" },
+                      { label: "Listening", pct: 60, color: "bg-[#2563EB]" },
+                      { label: "Vocabulary", pct: 50, color: "bg-[#4338CA]" },
+                      { label: "Grammar", pct: 35, color: "bg-[#0284C7]" },
+                      { label: "Sentence Formation", pct: 45, color: "bg-[#8B5CF6]" },
+                    ].map((skill) => (
+                      <div key={skill.label} className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-slate-400">
+                          <span>{skill.label}</span>
+                          <span className="font-bold text-[#0F172A] dark:text-white">{skill.pct}%</span>
+                        </div>
+                        <div className="w-full bg-[#F1F5F9] dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className={`h-1.5 rounded-full ${skill.color}`}
+                            style={{ width: `${skill.pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Right: Chintu Owl Companion Card (5 cols) */}
+                  <div className="sm:col-span-5 bg-[#F0F7FF] dark:bg-indigo-950/30 rounded-2xl p-3 border border-[#E0EDFB] dark:border-indigo-900/40 flex flex-col items-center justify-center text-center shadow-2xs">
+                    <ScholarOwl className="w-16 h-18 drop-shadow-2xs" />
+                    <h5 className="font-extrabold text-xs text-[#0F172A] dark:text-white mt-1.5">
+                      Chintu Owl
+                    </h5>
+                    <p className="text-[10px] text-[#64748B] dark:text-slate-400 font-medium leading-tight mt-1">
+                      Practice a little bit every day. You're doing great!
+                    </p>
+                  </div>
+
+                </div>
+
               </div>
+
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="animate-in fade-in duration-150">
+            <CumulativePracticeStudio
+              activeDayNumber={activeDayNumber}
+              onSwitchToLearning={() => setDashboardMode("learning")}
+            />
+          </div>
+        )}
 
-          {/* ----------------- TAB 3: FUN GAME LAB MODULE ----------------- */}
-          {activeTab === "games" && (
-            <div className="space-y-6 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-current/10">
-                <div>
-                  <h4 className="text-xl font-black">Word Jumble & Sentence Builder</h4>
-                  <p className="text-xs opacity-70">
-                    Tap the scrambled chips in the right order to translate the Hindi sentence!
-                  </p>
-                </div>
+          </div>
+        )}
 
+        {/* ===================================================================
+            VIEW 2: 45-DAY LEARNING ROADMAP (Exact Match to Top-Right of Mockup)
+            =================================================================== */}
+        {currentView === "roadmap" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header & Back to Dashboard */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+              <div>
                 <button
-                  onClick={handleResetJumble}
-                  className="px-3.5 py-2 rounded-xl border border-current/20 hover:border-current/40 text-xs font-bold flex items-center gap-1.5 self-start sm:self-center transition"
+                  onClick={() => setCurrentView("dashboard")}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5145E5] hover:underline mb-1"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Reset Word Chips</span>
+                  <ChevronLeft size={16} />
+                  <span>Back to Dashboard</span>
                 </button>
-              </div>
-
-              {/* Hindi Clue */}
-              <div className="text-center space-y-1">
-                <span className="text-xs font-extrabold uppercase opacity-60 tracking-wider">
-                  Translate into English (अंग्रेजी में सही क्रम बनाएं):
-                </span>
-                <p className="text-2xl sm:text-3xl font-black font-hindi">
-                  "{activeDay.game.questionHindi}"
+                <h1 className="text-2xl sm:text-3xl font-black text-[#172033] tracking-tight">
+                  45-Day Learning Roadmap
+                </h1>
+                <p className="text-xs sm:text-sm text-[#64748B] font-medium mt-0.5">
+                  Follow the daily plan and complete all 45 days to master English!
                 </p>
               </div>
 
-              {/* User Assembled Sentence Slots */}
-              <div
-                className={`min-h-[80px] p-4 rounded-2xl border-2 border-dashed flex flex-wrap items-center justify-center gap-3 transition-all ${
-                  gameEvaluated === "success"
-                    ? "border-emerald-500 bg-emerald-500/10"
-                    : gameEvaluated === "retry"
-                    ? "border-rose-500 bg-rose-500/10"
-                    : "border-current/20 bg-current/5"
+              {/* Search and Phase Dropdown */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="relative">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={roadmapSearch}
+                    onChange={(e) => setRoadmapSearch(e.target.value)}
+                    placeholder="Search days..."
+                    className="pl-9 pr-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 w-48 shadow-2xs"
+                  />
+                </div>
+
+                <select
+                  value={roadmapPhaseFilter}
+                  onChange={(e) => setRoadmapPhaseFilter(e.target.value === "all" ? "all" : parseInt(e.target.value, 10))}
+                  className="px-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-xs font-bold text-[#172033] focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs"
+                >
+                  <option value="all">All Phases</option>
+                  {COURSE_PHASES.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      Phase {p.id}: {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Phase Navigation Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs font-bold">
+              <button
+                onClick={() => setRoadmapPhaseFilter("all")}
+                className={`px-3.5 py-2 rounded-xl whitespace-nowrap transition ${
+                  roadmapPhaseFilter === "all"
+                    ? "bg-[#5145E5] text-white shadow-xs"
+                    : "bg-white text-slate-700 border border-[#E2E8F0] hover:bg-slate-50"
                 }`}
               >
-                {userSentence.length === 0 ? (
-                  <span className="text-xs sm:text-sm font-semibold opacity-50">
-                    (नीचे दिए गए शब्दों पर टैप करके वाक्य बनाएं)
+                All 45 Days
+              </button>
+
+              {COURSE_PHASES.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setRoadmapPhaseFilter(p.id)}
+                  className={`px-3 py-2 rounded-xl whitespace-nowrap flex items-center gap-1.5 transition ${
+                    roadmapPhaseFilter === p.id
+                      ? "bg-[#5145E5] text-white shadow-xs"
+                      : "bg-white text-slate-700 border border-[#E2E8F0] hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{p.icon}</span>
+                  <span>Phase {p.id}: {p.name}</span>
+                  <span className="opacity-60 text-[10px]">({p.days})</span>
+                </button>
+              ))}
+            </div>
+
+            {/* 45-Day Responsive Grid (7 Columns on large screens, matching mockup!) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
+              {filteredRoadmapDays.map((d) => {
+                const isCurrent = d.day === activeDayNumber;
+                const isCompleted = d.day < activeDayNumber;
+                const isLocked = d.day > activeDayNumber;
+
+                return (
+                  <div
+                    key={d.day}
+                    onClick={() => {
+                      setActiveDayNumber(d.day);
+                      setCurrentView("lesson-studio");
+                      setStudioTab("sentences");
+                    }}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 min-h-[140px] relative ${
+                      isCurrent
+                        ? "bg-white border-2 border-[#5145E5] shadow-md ring-2 ring-indigo-200"
+                        : isCompleted
+                        ? "bg-emerald-50/40 border-emerald-200 hover:border-emerald-400 hover:shadow-sm"
+                        : "bg-white border-[#E2E8F0] hover:border-indigo-300 opacity-90"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-extrabold text-[#172033]">
+                          Day {d.day}
+                        </span>
+                        {isCompleted && (
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                            <Check size={11} />
+                            <span>Done</span>
+                          </span>
+                        )}
+                        {isCurrent && (
+                          <span className="text-[10px] font-extrabold text-white bg-[#5145E5] px-2 py-0.5 rounded-full">
+                            Current
+                          </span>
+                        )}
+                        {isLocked && (
+                          <Lock size={12} className="text-slate-400" />
+                        )}
+                      </div>
+
+                      <h4 className="font-extrabold text-xs sm:text-sm text-[#172033] mt-2 leading-snug line-clamp-2">
+                        {d.title}
+                      </h4>
+                      <p className="text-[11px] text-[#64748B] font-hindi line-clamp-1 mt-0.5">
+                        {d.hindiTitle}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-[#64748B]">
+                      <span>{d.icon} P{d.phaseId}</span>
+                      <span className="text-[#5145E5] font-bold">Start →</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        )}
+
+        {/* ===================================================================
+            VIEW 3: LESSON STUDIO (Exact Match to Middle-Left & Center of Mockup)
+            =================================================================== */}
+        {currentView === "lesson-studio" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            
+            {/* Header: Back Navigation & Day Metadata */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#E2E8F0]">
+              <div className="space-y-1">
+                <button
+                  onClick={() => setCurrentView("roadmap")}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5145E5] hover:underline"
+                >
+                  <ChevronLeft size={16} />
+                  <span>Back to Roadmap</span>
+                </button>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <h1 className="text-xl sm:text-2xl font-black text-[#172033]">
+                    Day {activeDay.day}: {activeDay.title}
+                  </h1>
+                  <span className="text-base font-bold text-[#5145E5] font-hindi">
+                    ({activeDay.hindiTitle})
                   </span>
-                ) : (
-                  userSentence.map((word, idx) => (
-                    <button
-                      key={`chosen-${idx}`}
-                      onClick={() => handleRemoveWord(word, idx)}
-                      className="px-4 py-2 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-md flex items-center gap-2 hover:bg-indigo-700 active:scale-95 transition-all"
-                      title="Click to remove word"
-                    >
-                      <span>{word}</span>
-                      <span className="text-xs opacity-75">✕</span>
-                    </button>
-                  ))
-                )}
+                  <span className="text-xs text-[#64748B] font-semibold">
+                    • Phase {activeDay.phaseId}: {activeDay.phaseName}
+                  </span>
+                </div>
+
+                <p className="text-xs text-[#64748B] font-medium">
+                  Learning Objective: {activeDay.summary}
+                </p>
               </div>
 
-              {/* Available Word Bank Chips */}
-              <div className="space-y-2 text-center">
-                <span className="text-xs font-bold opacity-60 uppercase tracking-wider block">
-                  Available Word Chips:
-                </span>
-                <div className="flex flex-wrap items-center justify-center gap-3 py-2 min-h-[50px]">
-                  {poolWords.map((word, idx) => (
+              {/* Difficulty & Progress Indicator */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                  {(["easy", "medium", "hard"] as const).map((lvl) => (
                     <button
-                      key={`pool-${idx}`}
-                      onClick={() => handleAddWord(word, idx)}
-                      className="px-4 py-2.5 rounded-xl font-bold text-sm bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 border border-slate-300 dark:border-zinc-700 shadow-sm hover:border-indigo-500 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                      key={lvl}
+                      onClick={() => setSelectedDifficulty(lvl)}
+                      className={`px-2.5 py-1 rounded-lg capitalize transition ${
+                        selectedDifficulty === lvl
+                          ? "bg-white text-[#5145E5] shadow-2xs font-black"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
                     >
-                      {word}
+                      {lvl === "easy" ? "🟢 Easy" : lvl === "medium" ? "🟡 Medium" : "🔴 Hard"}
                     </button>
                   ))}
                 </div>
-              </div>
 
-              {/* Evaluation Banner */}
-              {gameEvaluated && (
-                <div
-                  className={`p-4 rounded-2xl text-center space-y-1.5 transition-all ${
-                    gameEvaluated === "success"
-                      ? "bg-emerald-500/15 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-200"
-                      : "bg-rose-500/15 border-2 border-rose-500 text-rose-800 dark:text-rose-200"
-                  }`}
-                >
-                  <div className="flex items-center justify-center gap-2 text-base sm:text-lg font-black">
-                    {gameEvaluated === "success" ? (
-                      <>
-                        <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-                        <span>Shabash! Perfect Sentence! (+15 Stars) 🎉</span>
-                      </>
+                <span className="text-xs font-extrabold text-[#64748B] bg-white border border-[#E2E8F0] px-3 py-1.5 rounded-xl">
+                  {activeSentenceIndex + 1}/{currentSentences.length} completed
+                </span>
+              </div>
+            </div>
+
+            {/* 3 Mode Tabs (Sentences | Reading Corner | Game Lab) */}
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2 text-xs sm:text-sm font-extrabold">
+              <button
+                onClick={() => setStudioTab("sentences")}
+                className={`px-4 py-2 rounded-xl flex items-center gap-2 transition ${
+                  studioTab === "sentences"
+                    ? "bg-[#5145E5] text-white shadow-xs"
+                    : "bg-white text-slate-700 border border-[#E2E8F0] hover:bg-slate-50"
+                }`}
+              >
+                <BookOpen size={16} />
+                <span>1. Sentences</span>
+              </button>
+
+              <button
+                onClick={() => setStudioTab("reading")}
+                className={`px-4 py-2 rounded-xl flex items-center gap-2 transition ${
+                  studioTab === "reading"
+                    ? "bg-[#5145E5] text-white shadow-xs"
+                    : "bg-white text-slate-700 border border-[#E2E8F0] hover:bg-slate-50"
+                }`}
+              >
+                <Sparkles size={16} />
+                <span>2. Reading Corner</span>
+              </button>
+
+              <button
+                onClick={() => setStudioTab("games")}
+                className={`px-4 py-2 rounded-xl flex items-center gap-2 transition ${
+                  studioTab === "games"
+                    ? "bg-[#5145E5] text-white shadow-xs"
+                    : "bg-white text-slate-700 border border-[#E2E8F0] hover:bg-slate-50"
+                }`}
+              >
+                <Gamepad2 size={16} />
+                <span>3. Game Lab</span>
+              </button>
+            </div>
+
+            {/* ------------------- TAB 1: SENTENCES MODE ------------------- */}
+            {studioTab === "sentences" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* Left Mini-Nav (3 Cols) */}
+                <div className="lg:col-span-3 bg-white rounded-3xl p-4 border border-[#E2E8F0] shadow-sm space-y-2">
+                  <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider px-2">
+                    Lesson Sentences
+                  </span>
+                  <div className="space-y-1">
+                    {currentSentences.map((s, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveSentenceIndex(idx)}
+                        className={`w-full text-left p-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition ${
+                          activeSentenceIndex === idx
+                            ? "bg-indigo-50 text-[#5145E5] font-black border border-indigo-200"
+                            : "hover:bg-slate-50 text-[#172033]"
+                        }`}
+                      >
+                        <span className="truncate">{idx + 1}. {s.english}</span>
+                        {activeSentenceIndex === idx && <Check size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Sentence Focus Player Card (9 Cols) */}
+                <div className="lg:col-span-9 bg-white rounded-3xl p-6 sm:p-8 border border-[#E2E8F0] shadow-sm space-y-6">
+                  
+                  {/* Top Sentence Display */}
+                  <div className="flex items-start gap-4">
+                    {/* Large Circular Audio Play Button */}
+                    <button
+                      onClick={() => speakText(currentSentence.english)}
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 text-[#5145E5] hover:bg-[#5145E5] hover:text-white flex items-center justify-center shrink-0 shadow-xs hover:scale-105 active:scale-95 transition-all"
+                      title="Listen to native audio"
+                    >
+                      <Volume2 size={28} className={isAudioPlaying ? "animate-pulse" : ""} />
+                    </button>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold text-[#5145E5]">
+                          Sentence {activeSentenceIndex + 1}
+                        </span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-xs text-slate-400 font-semibold font-hindi">
+                          "{currentSentence.phonetic}"
+                        </span>
+                      </div>
+
+                      <h2 className="text-2xl sm:text-3xl font-black text-[#172033] tracking-tight">
+                        {currentSentence.english}
+                      </h2>
+
+                      <p className="text-lg sm:text-xl font-bold text-slate-700 font-hindi">
+                        {currentSentence.hindi}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Context & Example Usage */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs font-medium">
+                    {currentSentence.usage && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-extrabold text-[#172033] shrink-0">Use:</span>
+                        <span className="text-slate-600">{currentSentence.usage}</span>
+                      </div>
+                    )}
+                    {currentSentence.example && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-extrabold text-[#172033] shrink-0">Example:</span>
+                        <span className="text-slate-700 font-semibold">{currentSentence.example}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Key Vocabulary Box */}
+                  {currentSentence.keyVocab && currentSentence.keyVocab.length > 0 && (
+                    <div className="p-4 rounded-2xl border border-indigo-100 bg-indigo-50/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-indigo-900">
+                          Key Vocabulary
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {currentSentence.keyVocab.map((v, i) => (
+                          <div
+                            key={i}
+                            className="px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-xs font-bold text-[#172033] shadow-2xs flex items-center gap-1.5"
+                          >
+                            <span className="text-[#5145E5] font-extrabold">{v.word}</span>
+                            <span className="text-slate-500 font-hindi font-medium">({v.meaning})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Speaking Practice Quick Mic */}
+                  <div className="p-4 rounded-2xl border border-pink-100 bg-pink-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-pink-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <Mic size={20} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-[#172033]">Speaking Practice</h4>
+                        <p className="text-[11px] text-[#64748B] font-medium">
+                          Say "{currentSentence.english}" aloud into your microphone!
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleStartSpeakingTest}
+                      disabled={isRecording}
+                      className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-extrabold text-xs shadow-xs active:scale-95 transition-all self-start sm:self-center"
+                    >
+                      {isRecording ? "Listening..." : "Practice Speech"}
+                    </button>
+                  </div>
+
+                  {/* Feedback toast if microphone was tested */}
+                  {micScore && (
+                    <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between text-xs font-bold">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={16} className="text-emerald-600" />
+                        <span>Recognized: "{micRecognizedText}"</span>
+                      </div>
+                      <span className="text-sm font-black text-emerald-700">{micScore}% Accuracy</span>
+                    </div>
+                  )}
+
+                  {/* Next / Previous Controls */}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <button
+                      onClick={() => setActiveSentenceIndex(Math.max(activeSentenceIndex - 1, 0))}
+                      disabled={activeSentenceIndex <= 0}
+                      className="px-4 py-2 rounded-xl border border-[#E2E8F0] text-xs font-bold disabled:opacity-40 hover:bg-slate-50 transition"
+                    >
+                      ← Previous
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (activeSentenceIndex < currentSentences.length - 1) {
+                          setActiveSentenceIndex(activeSentenceIndex + 1);
+                        } else {
+                          setStudioTab("reading");
+                        }
+                      }}
+                      className="px-6 py-2.5 rounded-xl bg-[#5145E5] hover:bg-[#4338CA] text-white font-extrabold text-xs shadow-xs transition"
+                    >
+                      {activeSentenceIndex < currentSentences.length - 1 ? "Next Sentence →" : "Proceed to Story →"}
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* ------------------- TAB 2: READING CORNER MODE ------------------- */}
+            {studioTab === "reading" && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E2E8F0] shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-[#172033]">
+                      {activeDay.reading.title}
+                    </h3>
+                    <p className="text-sm font-bold text-[#5145E5] font-hindi">
+                      {activeDay.reading.hindiTitle}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => speakText(activeDay.reading.storyEn)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5145E5] hover:bg-[#4338CA] text-white font-bold text-xs shadow-xs transition self-start sm:self-center"
+                  >
+                    <Volume2 size={16} />
+                    <span>Listen Story (कहानी सुनें)</span>
+                  </button>
+                </div>
+
+                {/* Bilingual Reading Text */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* English Passage */}
+                  <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 block">
+                      English Passage:
+                    </span>
+                    <p className="text-base sm:text-lg font-medium text-[#172033] leading-relaxed">
+                      {activeDay.reading.storyEn}
+                    </p>
+                  </div>
+
+                  {/* Hindi Translation */}
+                  <div className="p-6 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">
+                      हिंदी अनुवाद:
+                    </span>
+                    <p className="text-base sm:text-lg font-medium text-slate-800 font-hindi leading-relaxed">
+                      {activeDay.reading.storyHi}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Key Vocabulary Highlights */}
+                <div className="space-y-3 pt-2">
+                  <span className="text-xs font-black text-[#172033] block">
+                    Story Vocabulary Highlights
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {activeDay.reading.vocabWords.map((v, i) => (
+                      <div
+                        key={i}
+                        className="p-3 rounded-2xl border border-slate-200 bg-white shadow-2xs flex items-center justify-between"
+                      >
+                        <div>
+                          <p className="font-extrabold text-sm text-[#5145E5]">{v.word}</p>
+                          <p className="text-xs font-semibold text-slate-600 font-hindi">{v.meaning}</p>
+                          <p className="text-[10px] text-slate-400 font-hindi">"{v.phonetic}"</p>
+                        </div>
+                        <button
+                          onClick={() => speakText(v.word)}
+                          className="p-2 rounded-xl text-slate-500 hover:text-[#5145E5] hover:bg-indigo-50"
+                          title="Listen word"
+                        >
+                          <Volume2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4 border-t border-slate-100">
+                  <button
+                    onClick={() => setStudioTab("games")}
+                    className="px-6 py-2.5 rounded-xl bg-[#5145E5] hover:bg-[#4338CA] text-white font-extrabold text-xs shadow-xs transition"
+                  >
+                    Play Today's Word Game →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ------------------- TAB 3: GAME LAB (Exact Match to Middle-Center of Mockup!) ------------------- */}
+            {studioTab === "games" && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E2E8F0] shadow-sm space-y-6">
+                
+                {/* Game Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-[#5145E5] uppercase">
+                        Game Lab
+                      </span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-xs text-slate-500 font-bold">
+                        Day {activeDay.day}: Word Jumble
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-black text-[#172033] mt-0.5">
+                      Sentence Builder & Word Jumble
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-3 self-start sm:self-center">
+                    <span className="text-xs font-extrabold bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-xl flex items-center gap-1">
+                      <Star size={13} className="fill-amber-400 text-amber-500" />
+                      <span>Score: {jumbleScore}/5</span>
+                    </span>
+
+                    <button
+                      onClick={handleResetJumble}
+                      className="px-3 py-1.5 rounded-xl border border-[#E2E8F0] text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+                    >
+                      <RotateCcw size={13} />
+                      <span>Reset</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Hindi Prompt (Center) */}
+                <div className="text-center space-y-1.5 py-2">
+                  <h2 className="text-3xl sm:text-4xl font-black font-hindi text-[#172033]">
+                    "{activeDay.game.questionHindi}"
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#64748B] font-medium max-w-md mx-auto">
+                    Arrange the words in the correct order to make the English sentence.
+                  </p>
+                  <p className="text-xs text-slate-400 font-hindi">
+                    शब्दों को सही क्रम में लगाकर अंग्रेजी वाक्य बनाइए।
+                  </p>
+                </div>
+
+                {/* Target Numbered Assembled Slots */}
+                <div className="space-y-2">
+                  <span className="text-[11px] font-extrabold uppercase text-slate-400 tracking-wider block text-center">
+                    Assembled Sentence Slots:
+                  </span>
+
+                  <div className="min-h-[70px] p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-wrap items-center justify-center gap-2.5">
+                    {userPlacedWords.length === 0 ? (
+                      <span className="text-xs text-slate-400 font-semibold italic">
+                        (Tap the word chips below to place them in order)
+                      </span>
                     ) : (
-                      <>
-                        <AlertCircle className="w-6 h-6 text-rose-500" />
-                        <span>Try again! Make sure the words match the target grammar order.</span>
-                      </>
+                      userPlacedWords.map((word, idx) => (
+                        <button
+                          key={`placed-${idx}`}
+                          onClick={() => handleRemovePlacedWord(word, idx)}
+                          className="px-4 py-2.5 rounded-xl bg-[#5145E5] text-white font-extrabold text-sm shadow-xs flex items-center gap-2 hover:bg-[#4338CA] active:scale-95 transition-all"
+                          title="Click to remove word"
+                        >
+                          <span>{word}</span>
+                          <span className="text-xs opacity-75">✕</span>
+                        </button>
+                      ))
                     )}
                   </div>
                 </div>
-              )}
 
-              {/* Check Action Button */}
-              <div className="flex justify-center pt-2">
-                <button
-                  onClick={handleCheckJumble}
-                  disabled={userSentence.length === 0}
-                  className={`px-8 py-3.5 text-base flex items-center gap-2 ${theme.primaryBtn} disabled:opacity-40 disabled:cursor-not-allowed`}
-                >
-                  <Check className="w-5 h-5" />
-                  <span>Verify My Sentence (जांचें)</span>
-                </button>
+                {/* Available Shuffled English Word Chips */}
+                <div className="space-y-2 text-center pt-2">
+                  <span className="text-[11px] font-extrabold uppercase text-slate-400 tracking-wider block">
+                    Available Word Chips:
+                  </span>
+
+                  <div className="flex flex-wrap items-center justify-center gap-3 min-h-[48px]">
+                    {availableChips.map((chip, idx) => (
+                      <button
+                        key={`chip-${idx}`}
+                        onClick={() => handleSelectChip(chip, idx)}
+                        className="px-4 py-2 rounded-xl bg-white text-[#172033] border border-[#E2E8F0] font-extrabold text-sm shadow-2xs hover:border-[#5145E5] hover:text-[#5145E5] active:scale-95 transition-all"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Feedback Toast */}
+                {jumbleFeedback && (
+                  <div
+                    className={`p-4 rounded-2xl text-center space-y-1 ${
+                      jumbleFeedback === "success"
+                        ? "bg-emerald-50 border border-emerald-200 text-emerald-900"
+                        : "bg-rose-50 border border-rose-200 text-rose-900"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-2 text-base font-extrabold">
+                      {jumbleFeedback === "success" ? (
+                        <>
+                          <CheckCircle2 size={18} className="text-emerald-600" />
+                          <span>Correct! Shabash! (+15 XP & Stars) 🎉</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle size={18} className="text-rose-600" />
+                          <span>Not quite right. Try arranging the words again!</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons: Reset, Check Answer, Skip */}
+                <div className="flex items-center justify-center gap-3 pt-4 border-t border-slate-100">
+                  <button
+                    onClick={handleResetJumble}
+                    className="px-4 py-3 rounded-xl border border-[#E2E8F0] text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Reset
+                  </button>
+
+                  <button
+                    onClick={handleCheckJumble}
+                    disabled={userPlacedWords.length === 0}
+                    className="px-8 py-3 rounded-xl bg-[#5145E5] hover:bg-[#4338CA] text-white font-extrabold text-sm shadow-md shadow-indigo-500/20 disabled:opacity-40 transition"
+                  >
+                    Check Answer
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (activeDayNumber < 45) {
+                        setActiveDayNumber(activeDayNumber + 1);
+                      }
+                    }}
+                    className="px-4 py-3 rounded-xl border border-[#E2E8F0] text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Skip →
+                  </button>
+                </div>
+
               </div>
+            )}
+
+          </div>
+        )}
+
+        {/* ===================================================================
+            VIEW 4: SPEAK & REPEAT (Exact Match to Middle-Right of Mockup)
+            =================================================================== */}
+        {currentView === "speak-repeat" && (
+          <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-10 border border-[#E2E8F0] shadow-sm text-center space-y-8 animate-in fade-in duration-200">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
+              <button
+                onClick={() => setCurrentView("dashboard")}
+                className="font-bold text-[#5145E5] hover:underline flex items-center gap-1"
+              >
+                ← Back
+              </button>
+              <div className="flex items-center gap-1.5 font-extrabold text-[#172033]">
+                <Mic size={14} className="text-pink-600" />
+                <span>Day {activeDay.day}: Speak & Repeat Practice</span>
+              </div>
+              <button
+                onClick={() => setCurrentView("dashboard")}
+                className="font-bold text-slate-400 hover:text-slate-700"
+              >
+                Exit ✕
+              </button>
             </div>
-          )}
 
-        </section>
+            {/* Target Sentence Display */}
+            <div className="space-y-2">
+              <h2 className="text-3xl sm:text-4xl font-black text-[#172033] tracking-tight">
+                {currentSentence.english}
+              </h2>
+              <p className="text-xl font-bold text-slate-600 font-hindi">
+                {currentSentence.hindi}
+              </p>
+            </div>
 
-      </main>
+            {/* Big Circular Microphone Recorder Button */}
+            <div className="py-4 flex flex-col items-center justify-center space-y-3">
+              <button
+                onClick={handleStartSpeakingTest}
+                className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-300 ${
+                  isRecording
+                    ? "bg-rose-500 scale-105 animate-pulse ring-8 ring-rose-200"
+                    : "bg-[#5145E5] hover:bg-[#4338CA] hover:scale-105 ring-8 ring-indigo-50"
+                }`}
+                title="Tap to record voice"
+              >
+                {isRecording ? <MicOff size={44} /> : <Mic size={44} />}
+              </button>
 
-      {/* ---------------------------------------------------------------------
-          3. MASTER GRADUATION CERTIFICATE MODAL
-          --------------------------------------------------------------------- */}
+              <span className="text-xs font-extrabold text-[#64748B]">
+                {isRecording ? "Listening... Speak clearly now!" : "Tap to record your voice"}
+              </span>
+            </div>
+
+            {/* Action Buttons: Listen (TTS) & Play My Recording */}
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => speakText(currentSentence.english)}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold flex items-center gap-2 transition"
+              >
+                <Volume2 size={16} className="text-[#5145E5]" />
+                <span>Listen Native Audio</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (micRecognizedText) {
+                    speakText(micRecognizedText);
+                  } else {
+                    speakText(currentSentence.english);
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold flex items-center gap-2 transition"
+              >
+                <Play size={16} className="text-emerald-600 fill-emerald-600" />
+                <span>Play My Recording</span>
+              </button>
+            </div>
+
+            {/* Feedback Score */}
+            {micScore && (
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                <span className="text-2xl font-black text-emerald-700">{micScore}% Match</span>
+                <p className="text-xs font-semibold">Recognized: "{micRecognizedText}"</p>
+              </div>
+            )}
+
+            {/* Helpful Disclaimer */}
+            <p className="text-[11px] text-slate-400 font-medium max-w-sm mx-auto">
+              Allow microphone access for best experience. If not available, you can still practice by listening and repeating.
+            </p>
+
+          </div>
+        )}
+
+      </div>
+
+      {/* Graduation Certificate Modal */}
       <GraduationCertificateModal
         isOpen={isCertificateOpen}
         onClose={() => setIsCertificateOpen(false)}
-        studentName={profile?.displayName || "Super Learner"}
+        studentName={userName}
         completedDays={activeDayNumber}
-        persona={persona}
       />
 
-      {/* ---------------------------------------------------------------------
-          4. FOOTER
-          --------------------------------------------------------------------- */}
-      <footer
-        className={`w-full border-t border-current/10 py-8 px-4 sm:px-6 lg:px-8 mt-12 text-xs opacity-80 ${
-          persona === "teen" ? "bg-zinc-950 text-zinc-500" : "bg-slate-100 text-slate-600"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">
-              S
-            </div>
-            <span className="font-extrabold text-current">SpeakEasy English • 45-Day Course</span>
-          </div>
+      {/* Easy Full-Screen Onboarding: Splash Screen -> Kids / Teen / Adult -> Purpose of Learning */}
+      <EasyOnboardingModal
+        isOpen={isOnboardingOpen}
+        initialPhase={onboardingInitialPhase}
+        onClose={() => setIsOnboardingOpen(false)}
+        onComplete={handleCompleteOnboarding}
+      />
 
-          <div className="flex flex-wrap items-center justify-center gap-6 font-semibold">
-            <button onClick={() => setPersona("kids")} className="hover:underline">
-              🧒 Kids Mode
-            </button>
-            <button onClick={() => setPersona("teen")} className="hover:underline">
-              ⚡ Teen Mode
-            </button>
-            <button onClick={() => setPersona("adult")} className="hover:underline">
-              💼 Adult Mode
-            </button>
-            <button onClick={() => setFlowStep("splash")} className="hover:underline">
-              Splash Screen
-            </button>
-            <button onClick={() => setIsCertificateOpen(true)} className="hover:underline">
-              Graduation Certificate 🎓
-            </button>
-          </div>
-
-          <div className="text-center sm:text-right">
-            Designed for Hindi to English Learners Across All Demographics
-          </div>
-        </div>
-      </footer>
-
-=======
-  const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
-
-  return (
-    <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start pb-10">
-      {/* ======================================================== */}
-      {/* MAIN CONTENT AREA (Left 8 cols on desktop) */}
-      {/* ======================================================== */}
-      <div className="lg:col-span-8 space-y-6">
-        {/* ======================================================== */}
-        {/* 1. SUMMARISED LIGHT HERO (Clean EdTech Style, No Gradient) */}
-        {/* ======================================================== */}
-        <section
-          aria-labelledby="course-hero-heading"
-          className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700"
-        >
-          {/* Top Status Badges */}
-          <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border border-amber-200/80 dark:border-amber-900/60 text-[11px] font-bold">
-              <Sparkles size={12} className="text-amber-500 fill-amber-500" />
-              <span>30-Day Spoken English • Day 1</span>
-            </span>
-
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 text-xs font-bold">
-              <Flame size={13} className="fill-amber-500 text-amber-500" />
-              <span>{profile.streakCount} Day Streak</span>
-            </div>
-          </div>
-
-          {/* Heading in High-Legibility Devanagari */}
-          <h1
-            id="course-hero-heading"
-            className="text-xl sm:text-2xl font-bold font-hindi mt-3 text-slate-900 dark:text-white tracking-tight leading-snug"
-          >
-            रोज बोले जाने वाले 5000+ अंग्रेज़ी वाक्य
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium leading-relaxed max-w-xl">
-            Bite-sized daily conversational sentences with Hindi meanings, authentic pronunciation, and interactive sentence-ordering practice.
-          </p>
-
-          {/* Compact Inline Progress */}
-          <div className="mt-3.5 pt-3.5 border-t border-amber-100 dark:border-amber-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <span>Day 1: Everyday Foundations</span>
-              <span className="text-amber-300 dark:text-amber-800">•</span>
-              <span className="text-amber-600 dark:text-amber-400 font-bold">15% Done</span>
-            </div>
-            <div className="w-full sm:w-52 h-2 rounded-full bg-amber-100 dark:bg-amber-950/70 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full w-[15%] transition-all duration-500" />
-            </div>
-          </div>
-
-          {/* Action Buttons (Dual-Tone Yellowish/Amber Style) */}
-          <div className="mt-4 flex flex-wrap items-center gap-2.5">
-            <Link
-              href="/sentences?day=1"
-              id="home-btn-sentences"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-xs sm:text-sm shadow-md active:scale-95 transition-all"
-            >
-              <Languages size={15} />
-              <span>Read Day 1 Sentences</span>
-            </Link>
-
-            <Link
-              href="/play/sentence-jumble"
-              id="home-btn-jumble"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800/80 font-bold text-xs sm:text-sm active:scale-95 transition-all"
-            >
-              <Play size={13} className="fill-amber-600 dark:fill-amber-400 text-amber-600 dark:text-amber-400" />
-              <span>Sentence Jumble Game</span>
-            </Link>
-          </div>
-        </section>
-
-        {/* ======================================================== */}
-        {/* 2. SENTENCE OF THE DAY CARD (आज का वाक्य) */}
-        {/* ======================================================== */}
-        <section aria-labelledby="today-sentence-heading">
-          <div className="flex items-center justify-between mb-2.5 px-1">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-              <h2
-                id="today-sentence-heading"
-                className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-              >
-                Sentence of the Day • आज का वाक्य
-              </h2>
-            </div>
-            <Link
-              href="/sentences"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
-            >
-              <span>All 120+ Sentences</span>
-              <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="reading-book-card rounded-3xl p-6 sm:p-7 transition-all">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-2 flex-1">
-                <span className="inline-block text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-100/80 dark:border-blue-900/40">
-                  Day {featuredSentence.day} • {featuredSentence.category}
-                </span>
-
-                {/* Hindi Meaning on top */}
-                <p className="text-base sm:text-lg font-hindi font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {featuredSentence.hindi}
-                </p>
-
-                {/* English Sentence below in High-Comfort Book Font */}
-                <p className="reader-sentence font-reading text-xl sm:text-2xl font-medium text-slate-900 dark:text-slate-50 tracking-normal leading-relaxed">
-                  {featuredSentence.english}
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => speakText(featuredSentence.english)}
-                  className={`p-2.5 rounded-xl border transition-all ${
-                    isSpeakingSentence
-                      ? "bg-blue-600 text-white border-blue-600 animate-pulse"
-                      : "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900 hover:bg-blue-100"
-                  }`}
-                  title="Listen to Native Pronunciation"
-                >
-                  <Volume2 size={18} />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toggleFavouriteSentence(featuredSentence.id)}
-                  className={`p-2.5 rounded-xl border transition-all ${
-                    isSentenceFavourited(featuredSentence.id)
-                      ? "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40"
-                      : "bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:text-rose-500 hover:bg-rose-50"
-                  }`}
-                  title="Save favourite sentence"
-                >
-                  <Bookmark
-                    size={18}
-                    className={
-                      isSentenceFavourited(featuredSentence.id)
-                        ? "fill-rose-500 text-rose-500"
-                        : ""
-                    }
-                  />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => shareToWhatsApp(featuredSentence.hindi, featuredSentence.english)}
-                  className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
-                  title="Share on WhatsApp"
-                >
-                  <Share2 size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ======================================================== */}
-        {/* 3. DAY-BY-DAY LESSONS GRID (दैनिक पाठ) */}
-        {/* ======================================================== */}
-        <section aria-labelledby="day-cards-heading">
-          <div className="flex items-center justify-between mb-2.5 px-1">
-            <h2
-              id="day-cards-heading"
-              className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-            >
-              Day-by-Day Lessons • दैनिक पाठ
-            </h2>
-            <Link
-              href="/sentences"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
-            >
-              <span>View All 10 Days</span>
-              <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {allDays.slice(0, 4).map((d) => (
-              <Link
-                key={d.day}
-                href={`/sentences?day=${d.day}`}
-                className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-blue-400 dark:hover:border-blue-600 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-xs flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  D{d.day}
-                </div>
-                <h3 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 transition-colors">
-                  {d.title}
-                </h3>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 font-medium">
-                  {d.count} Sentences
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* ======================================================== */}
-        {/* 4. PRACTICE GAMES (3-Min Spoken Fluency) */}
-        {/* ======================================================== */}
-        <section aria-labelledby="games-heading">
-          <div className="flex items-center justify-between mb-2.5 px-1">
-            <h2
-              id="games-heading"
-              className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-            >
-              Practice Games • 3-Min Fluency
-            </h2>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              +10 XP each
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            {/* Game 1: Sentence Jumble */}
-            <Link
-              href="/play/sentence-jumble"
-              id="home-game-sentence-jumble"
-              className="p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:border-blue-500 transition-all group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center font-bold">
-                    <Languages size={20} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                    Flagship
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
-                  Sentence Jumble
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-medium">
-                  Tap scrambled English words into correct natural grammar order.
-                </p>
-              </div>
-              <div className="mt-3.5 flex items-center gap-1 text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
-                <span>Play Now</span>
-                <ArrowRight size={13} />
-              </div>
-            </Link>
-
-            {/* Game 2: Fill in the Blanks */}
-            <Link
-              href="/play/fill-blanks"
-              id="home-game-fill-blanks"
-              className="p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:border-emerald-500 transition-all group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center font-bold">
-                    <Puzzle size={20} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">
-                    Grammar
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">
-                  Fill in the Blanks
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-medium">
-                  Choose the natural missing word from 4 multiple-choice options.
-                </p>
-              </div>
-              <div className="mt-3.5 flex items-center gap-1 text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition-transform">
-                <span>Play Now</span>
-                <ArrowRight size={13} />
-              </div>
-            </Link>
-
-            {/* Game 3: Word Jumble */}
-            <Link
-              href="/play/word-jumble"
-              id="home-game-word-jumble"
-              className="p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:border-indigo-500 transition-all group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center font-bold">
-                    <Clock size={20} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300">
-                    Spelling
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
-                  Word Jumble
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-medium">
-                  Unscramble letters to match the vocabulary word clue.
-                </p>
-              </div>
-              <div className="mt-3.5 flex items-center gap-1 text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
-                <span>Play Now</span>
-                <ArrowRight size={13} />
-              </div>
-            </Link>
-          </div>
-        </section>
-      </div>
-
-      {/* ======================================================== */}
-      {/* DESKTOP SIDEBAR AREA (Right 4 cols on desktop) */}
-      {/* ======================================================== */}
-      <aside className="hidden lg:block lg:col-span-4 space-y-5 sticky top-20">
-        {/* 1. Daily Study Streak & Goal Tracker */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/50 flex items-center justify-center text-amber-600">
-                <Flame size={17} className="fill-amber-500" />
-              </div>
-              <div>
-                <h3 className="text-xs font-bold text-slate-900 dark:text-white">Daily Consistency</h3>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">{profile.streakCount} Day Active Streak</span>
-              </div>
-            </div>
-            <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{profile.xp} XP</span>
-          </div>
-
-          {/* 7-Day Visual Dots */}
-          <div className="grid grid-cols-7 gap-1.5 py-2.5 border-y border-slate-100 dark:border-slate-800 my-3">
-            {daysOfWeek.map((day, idx) => {
-              const isToday = idx === 1; // Tuesday
-              const isPastCompleted = idx < 1;
-              return (
-                <div key={idx} className="flex flex-col items-center gap-1">
-                  <span className="text-[10px] font-bold text-slate-400">{day}</span>
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
-                      isToday
-                        ? "bg-amber-500 text-white shadow-sm ring-2 ring-amber-300 dark:ring-amber-800"
-                        : isPastCompleted
-                        ? "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                    }`}
-                  >
-                    {isPastCompleted ? <Check size={12} className="stroke-[3]" /> : idx + 1}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Daily Goal Target */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                <Target size={13} className="text-blue-600" />
-                <span>Daily Practice Goal</span>
-              </span>
-              <span className="font-bold text-slate-900 dark:text-white">3 / 5 Done</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-              <div className="h-full bg-emerald-500 rounded-full w-[60%]" />
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Bite-Sized Word of the Day */}
-        <div className="reading-book-card rounded-3xl p-5 sm:p-6">
-          <div className="flex items-center justify-between mb-2.5">
-            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/60">
-              Word of the Day • शब्द ज्ञान
-            </span>
-            <Link
-              href="/learn"
-              className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Browse All
-            </Link>
-          </div>
-
-          <div className="flex items-baseline justify-between gap-2 mt-2">
-            <h3 className="text-xl font-bold font-reading text-slate-900 dark:text-white">
-              {wordOfTheDay.word}
-            </h3>
-            <span className="text-xs text-slate-500 font-mono">
-              {wordOfTheDay.pronunciation}
-            </span>
-          </div>
-
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-normal">
-            {wordOfTheDay.meaning}
-          </p>
-
-          <div className="mt-3 p-3 rounded-2xl bg-paper-100/70 dark:bg-slate-800/60 border border-paper-200 dark:border-slate-700/60 text-xs text-slate-800 dark:text-slate-200 font-reading italic leading-relaxed">
-            &ldquo;{wordOfTheDay.exampleSentence}&rdquo;
-          </div>
-
-          <div className="mt-3 flex items-center justify-between pt-2">
-            <button
-              type="button"
-              onClick={() => speakText(wordOfTheDay.word, true)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-                isSpeakingWord
-                  ? "bg-blue-600 text-white"
-                  : "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100"
-              }`}
-            >
-              <Volume2 size={14} />
-              <span>Pronounce</span>
-            </button>
-
-            <Link
-              href="/learn"
-              className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-colors"
-            >
-              <span>View in Library</span>
-              <ChevronRight size={13} />
-            </Link>
-          </div>
-        </div>
-
-        {/* 3. Quick Links & Bookmarked Sentences */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-2">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">
-            Quick Learning Shortcuts
-          </h3>
-
-          <Link
-            href="/sentences?filter=favs"
-            className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors group"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-500">
-                <Heart size={15} className="fill-rose-500" />
-              </div>
-              <span className="text-xs font-bold">Favourite Sentences</span>
-            </div>
-            <span className="text-xs font-bold text-slate-400 group-hover:text-blue-600">
-              {profile.favouriteSentenceIds?.length || 0}
-            </span>
-          </Link>
-
-          <Link
-            href="/learn"
-            className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors group"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600">
-                <BookOpen size={15} />
-              </div>
-              <span className="text-xs font-bold">Vocabulary Bank</span>
-            </div>
-            <span className="text-xs font-bold text-slate-400 group-hover:text-blue-600">
-              50+ Words
-            </span>
-          </Link>
-        </div>
-      </aside>
->>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
     </div>
   );
 }

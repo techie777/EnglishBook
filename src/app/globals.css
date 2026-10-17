@@ -112,10 +112,18 @@ html[data-reading-size="large"] .reader-sentence {
   line-height: 1.6;
 }
 
+body {
+  padding-bottom: 4.75rem;
+}
+
 @media (min-width: 768px) {
   body {
     padding-bottom: 0;
   }
+}
+
+body.has-fullscreen-modal {
+  padding-bottom: 0 !important;
 }
 
 /* Paper Theme specific styles */
@@ -161,3 +169,47 @@ html[data-reading-size="large"] .reader-sentence {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Global Full-Screen Gamified Modal Mode: Eliminates all UI clutter, bottom nav bar, and dual scrollbars */
+html.has-fullscreen-modal,
+body.has-fullscreen-modal {
+  overflow: hidden !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  touch-action: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html.has-fullscreen-modal::-webkit-scrollbar,
+body.has-fullscreen-modal::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+body.has-fullscreen-modal header.sticky,
+body.has-fullscreen-modal nav,
+body.has-fullscreen-modal [data-bottom-nav="true"],
+body.has-fullscreen-modal .md\:hidden.fixed.bottom-0 {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Modal interactive arena scrollbar suppression */
+.fullscreen-modal-arena,
+.fullscreen-modal-arena * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.fullscreen-modal-arena::-webkit-scrollbar,
+.fullscreen-modal-arena *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+

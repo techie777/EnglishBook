@@ -12,6 +12,18 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        dashboard: '#F5F8FC',
+        cardBorder: '#E6EDF5',
+        primaryBlue: '#2563EB',
+        bannerIndigo: '#4338CA',
+        bannerCyan: '#06B6D4',
+        badgeGreen: '#10B981',
+        badgeBlue: '#3B82F6',
+        badgeOrange: '#F97316',
+        pastelPink: '#FFF1F2',
+        pastelBlue: '#F0F9FF',
+        pastelGreen: '#F0FDF4',
+        pastelAmber: '#FFFBEB',
         // Warm Dual-Tone Amber & Gold Palette (scholastic, warm, engaging)
         brand: {
           50: "#fffbeb",

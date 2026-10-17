@@ -30,7 +30,7 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#5145E5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -40,32 +40,26 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: {
     template: "%s | SpeakEasy English",
-    default: "SpeakEasy English — Daily English Vocabulary & Games for Indian Learners",
+    default: "SpeakEasy English — 45-Day Spoken English Course & Daily Practice",
   },
   description:
-    "Master conversational English through bite-sized daily games, authentic Indian context vocabulary, pronunciation guides, and streak gamification. Built for Indian students and professionals.",
+    "Master conversational English through a structured 45-day course, daily vocabulary, reading corner, and interactive games for Indian learners.",
   keywords: [
     "learn spoken english",
     "english vocabulary app",
     "spoken english for indian students",
     "daily english practice",
-    "fill in the blanks english game",
+    "45 day english course",
     "english word jumble",
     "speak english fluently",
   ],
   manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "SpeakEasy",
-  },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: "/favicon.ico",
   },
   openGraph: {
     title: "SpeakEasy English — Daily Spoken English Practice",
-    description: "Daily bite-sized games and vocabulary for Indian students and professionals.",
+    description: "Daily bite-sized games, 45-day course, and vocabulary for Indian learners.",
     siteName: "SpeakEasy English",
     locale: "en_IN",
     type: "website",
@@ -78,46 +72,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-<<<<<<< HEAD
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col antialiased bg-[#f8fafc] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
-        <UserProvider>
-          <TopHeader />
-          <main className="flex-1 w-full">
-            {children}
-          </main>
-          <BottomNav />
-        </UserProvider>
-=======
     <html
       lang="en"
       className={`h-full ${plusJakartaSans.variable} ${literata.variable} ${notoSansDevanagari.variable}`}
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  for (var r of regs) { r.unregister(); }
-                });
-              }
-            `,
-          }}
-        />
-      </head>
-      <body className="min-h-full flex flex-col antialiased bg-[#FAF8F5] dark:bg-[#14110E] text-slate-900 dark:text-amber-50 font-sans transition-colors duration-200">
+      <body className="min-h-full flex flex-col antialiased bg-[#F8FAFC] dark:bg-[#0B1120] text-[#172033] dark:text-slate-100 font-sans transition-colors duration-200">
         <ReaderProvider>
           <UserProvider>
             <TopHeader />
             <PlacementTestModal />
-            <main className="flex-1 w-full min-h-screen">
+            <main className="flex-1 w-full min-h-[calc(100vh-4rem)]">
               {children}
             </main>
             <BottomNav />
           </UserProvider>
         </ReaderProvider>
->>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
       </body>
     </html>
   );
