@@ -8,6 +8,10 @@ import { Home, Languages, Gamepad2, BookOpen, TrendingUp } from "lucide-react";
 export function BottomNav() {
   const pathname = usePathname();
 
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/sentences", label: "Sentences", icon: Languages },
@@ -19,7 +23,11 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
+<<<<<<< HEAD
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-panel border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 py-2 px-3 safe-area-pb shadow-elevated"
+=======
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 dark:border-slate-800 bg-[var(--card)]/95 backdrop-blur-md py-2 px-3 safe-area-pb shadow-elevated transition-colors"
+>>>>>>> c122348e1225b9adfb218b64210c0bac27cf31b2
     >
       <div className="max-w-md mx-auto flex items-center justify-around">
         {navItems.map((item) => {

@@ -18,9 +18,20 @@ import {
   RecaptchaVerifier,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { TopicProgress, AgeGroup, SkillModality } from "@/lib/schema/leveled-learning";
+import {
+  recordTopicAttempt as engineRecordAttempt,
+  createDefaultTopicProgress,
+  loadAllTopicProgress,
+  saveAllTopicProgress,
+  AttemptResult,
+} from "@/lib/services/progression-engine";
+import { MASTER_TOPICS } from "@/data/topics-data";
+import { calculatePlacement, PlacementResult } from "@/data/placement-test-data";
 
 const STORAGE_PROFILE_KEY = "speakeasy_user_profile";
 const STORAGE_PROGRESS_KEY = "speakeasy_word_progress";
+const STORAGE_TOPIC_PROGRESS_KEY = "speakeasy_topic_progress";
 
 const DEFAULT_PROFILE: UserProfile = {
   uid: "guest-" + Math.random().toString(36).substring(2, 9),
@@ -33,6 +44,15 @@ const DEFAULT_PROFILE: UserProfile = {
   xp: 50,
   streakFreeze: false,
   favouriteSentenceIds: [],
+  ageGroup: "adults",
+  placementCompleted: false,
+  placedLevel: 1,
+  skillLevels: {
+    read: { current: 1, maxUnlocked: 1 },
+    speak: { current: 1, maxUnlocked: 1 },
+    write: { current: 1, maxUnlocked: 1 },
+    listen: { current: 1, maxUnlocked: 1 },
+  },
 };
 
 interface UserContextValue {
@@ -55,6 +75,19 @@ interface UserContextValue {
   resetProgress: () => void;
   wordsLearnedCount: number;
   favouriteSentencesCount: number;
+  topicProgress: Record<string, TopicProgress>;
+  getTopicProgress: (topicId: string) => TopicProgress;
+  recordTopicAttempt: (topicId: string, isCorrect: boolean) => AttemptResult;
+  lastAttemptResult: AttemptResult | null;
+  clearLastAttemptResult: () => void;
+  setAgeGroup: (ageGroup: AgeGroup) => void;
+  completePlacementTest: (score: number, ageGroup: AgeGroup) => PlacementResult;
+  isLevelUnlocked: (modality: SkillModality, level: number) => boolean;
+  unlockLevel: (modality: SkillModality, level: number) => void;
+  setSkillLevel: (modality: SkillModality, level: number) => void;
+  isPlacementModalOpen: boolean;
+  openPlacementModal: () => void;
+  closePlacementModal: () => void;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -62,6 +95,9 @@ const UserContext = createContext<UserContextValue | null>(null);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [wordProgress, setWordProgress] = useState<Record<string, WordProgress>>({});
+  const [topicProgress, setTopicProgress] = useState<Record<string, TopicProgress>>({});
+  const [lastAttemptResult, setLastAttemptResult] = useState<AttemptResult | null>(null);
+  const [isPlacementModalOpen, setIsPlacementModalOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Initialize from LocalStorage
@@ -69,6 +105,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       const savedProfile = localStorage.getItem(STORAGE_PROFILE_KEY);
       const savedProgress = localStorage.getItem(STORAGE_PROGRESS_KEY);
+      const savedTopicProgress = localStorage.getItem(STORAGE_TOPIC_PROGRESS_KEY);
 
       if (savedProfile) {
         setProfile(JSON.parse(savedProfile));
@@ -76,12 +113,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (savedProgress) {
         setWordProgress(JSON.parse(savedProgress));
       }
+      if (savedTopicProgress) {
+        setTopicProgress(JSON.parse(savedTopicProgress));
+      } else {
+        // Seed default unlocked status for topics without prerequisites
+        const initial: Record<string, TopicProgress> = {};
+        MASTER_TOPICS.forEach((t) => {
+          initial[t.topic_id] = createDefaultTopicProgress(
+            DEFAULT_PROFILE.uid,
+            t.topic_id,
+            t.prerequisite_topic_ids.length === 0
+          );
+        });
+        setTopicProgress(initial);
+      }
     } catch (e) {
       console.error("Failed loading from localStorage:", e);
     } finally {
       setIsLoaded(true);
     }
   }, []);
+
+  // Save topic progress to LocalStorage
+  useEffect(() => {
+    if (!isLoaded) return;
+    try {
+      localStorage.setItem(STORAGE_TOPIC_PROGRESS_KEY, JSON.stringify(topicProgress));
+    } catch (e) {
+      console.error("Failed saving topic progress to localStorage:", e);
+    }
+  }, [topicProgress, isLoaded]);
 
   // Save to LocalStorage whenever profile changes
   useEffect(() => {
@@ -299,6 +360,123 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(STORAGE_PROGRESS_KEY);
   };
 
+  const getTopicProgress = (topicId: string): TopicProgress => {
+    if (topicProgress[topicId]) {
+      return topicProgress[topicId];
+    }
+    const topic = MASTER_TOPICS.find((t) => t.topic_id === topicId);
+    return createDefaultTopicProgress(
+      profile.uid,
+      topicId,
+      !topic || topic.prerequisite_topic_ids.length === 0
+    );
+  };
+
+  const recordTopicAttempt = (topicId: string, isCorrect: boolean): AttemptResult => {
+    const current = getTopicProgress(topicId);
+    const result = engineRecordAttempt(current, isCorrect);
+
+    setTopicProgress((prev) => ({
+      ...prev,
+      [topicId]: result.updatedProgress,
+    }));
+
+    setLastAttemptResult(result);
+
+    // Sync XP to user profile
+    if (result.xpEarned > 0) {
+      setProfile((prev) => ({
+        ...prev,
+        xp: prev.xp + result.xpEarned,
+      }));
+    }
+
+    return result;
+  };
+
+  const clearLastAttemptResult = () => setLastAttemptResult(null);
+
+  const setAgeGroup = (group: AgeGroup) => {
+    setProfile((prev) => ({
+      ...prev,
+      ageGroup: group,
+    }));
+  };
+
+  const completePlacementTest = (score: number, chosenAgeGroup: AgeGroup): PlacementResult => {
+    const result = calculatePlacement(score);
+
+    setProfile((prev) => {
+      const placed = result.placedLevel;
+      return {
+        ...prev,
+        ageGroup: chosenAgeGroup,
+        placementCompleted: true,
+        placedLevel: placed,
+        xp: prev.xp + 100, // +100 bonus XP for completing diagnostic test
+        skillLevels: {
+          read: { current: placed, maxUnlocked: Math.max(prev.skillLevels?.read?.maxUnlocked || 1, placed) },
+          speak: { current: placed, maxUnlocked: Math.max(prev.skillLevels?.speak?.maxUnlocked || 1, placed) },
+          write: { current: placed, maxUnlocked: Math.max(prev.skillLevels?.write?.maxUnlocked || 1, placed) },
+          listen: { current: placed, maxUnlocked: Math.max(prev.skillLevels?.listen?.maxUnlocked || 1, placed) },
+        },
+      };
+    });
+
+    setIsPlacementModalOpen(false);
+    return result;
+  };
+
+  const isLevelUnlocked = (modality: SkillModality, level: number): boolean => {
+    const maxUnlocked = profile.skillLevels?.[modality]?.maxUnlocked || profile.placedLevel || 1;
+    return level <= maxUnlocked;
+  };
+
+  const unlockLevel = (modality: SkillModality, level: number) => {
+    setProfile((prev) => {
+      const currentMod = prev.skillLevels?.[modality] || { current: 1, maxUnlocked: 1 };
+      return {
+        ...prev,
+        skillLevels: {
+          ...(prev.skillLevels || {
+            read: { current: 1, maxUnlocked: 1 },
+            speak: { current: 1, maxUnlocked: 1 },
+            write: { current: 1, maxUnlocked: 1 },
+            listen: { current: 1, maxUnlocked: 1 },
+          }),
+          [modality]: {
+            ...currentMod,
+            maxUnlocked: Math.max(currentMod.maxUnlocked, level),
+          },
+        },
+      };
+    });
+  };
+
+  const setSkillLevel = (modality: SkillModality, level: number) => {
+    setProfile((prev) => {
+      const currentMod = prev.skillLevels?.[modality] || { current: 1, maxUnlocked: 1 };
+      return {
+        ...prev,
+        skillLevels: {
+          ...(prev.skillLevels || {
+            read: { current: 1, maxUnlocked: 1 },
+            speak: { current: 1, maxUnlocked: 1 },
+            write: { current: 1, maxUnlocked: 1 },
+            listen: { current: 1, maxUnlocked: 1 },
+          }),
+          [modality]: {
+            current: level,
+            maxUnlocked: Math.max(currentMod.maxUnlocked, level),
+          },
+        },
+      };
+    });
+  };
+
+  const openPlacementModal = () => setIsPlacementModalOpen(true);
+  const closePlacementModal = () => setIsPlacementModalOpen(false);
+
   const wordsLearnedCount = Object.keys(wordProgress).length;
   const favouriteSentencesCount = profile.favouriteSentenceIds?.length || 0;
 
@@ -320,6 +498,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         resetProgress,
         wordsLearnedCount,
         favouriteSentencesCount,
+        topicProgress,
+        getTopicProgress,
+        recordTopicAttempt,
+        lastAttemptResult,
+        clearLastAttemptResult,
+        setAgeGroup,
+        completePlacementTest,
+        isLevelUnlocked,
+        unlockLevel,
+        setSkillLevel,
+        isPlacementModalOpen,
+        openPlacementModal,
+        closePlacementModal,
       }}
     >
       {children}

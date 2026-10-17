@@ -122,11 +122,11 @@ export default function CategoryDetailPage({ params }: CategoryPageProps) {
           <article
             key={item.id}
             id={`word-item-${item.id}`}
-            className="rounded-3xl bg-white dark:bg-slate-900 border border-amber-900/10 dark:border-slate-800 p-4 sm:p-5 shadow-card hover:border-brand-400 transition-all flex flex-col justify-between"
+            className="reading-book-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between"
           >
             <div>
-              <div className="flex items-start gap-3.5 mb-3">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden relative flex-shrink-0 bg-amber-50">
+              <div className="flex items-start gap-3.5 mb-3.5">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden relative flex-shrink-0 bg-paper-100 shadow-subtle">
                   <Image
                     src={item.imageUrl}
                     alt={`${item.word} photo demonstration`}
@@ -139,7 +139,7 @@ export default function CategoryDetailPage({ params }: CategoryPageProps) {
 
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                    <h2 className="text-xl font-bold font-reading text-slate-900 dark:text-white tracking-tight">
                       {item.word}
                     </h2>
                     <span className="text-[10px] font-semibold capitalize px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
@@ -148,36 +148,44 @@ export default function CategoryDetailPage({ params }: CategoryPageProps) {
                   </div>
 
                   {item.pronunciation && (
-                    <p className="text-xs text-slate-400 font-mono mt-0.5">
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">
                       {item.pronunciation}
                     </p>
                   )}
 
-                  <div className="mt-1">
+                  <div className="mt-1.5">
                     <PronounceButton text={item.word} size={14} label="Pronounce" />
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
-                {item.meaning}
-              </p>
-
-              <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 text-xs text-slate-800 dark:text-slate-200 mb-2.5">
-                <span className="font-bold text-brand-700 dark:text-brand-400 block mb-0.5">
-                  Example:
+              <div className="mb-3">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-0.5">
+                  Definition
                 </span>
-                <p className="italic">&ldquo;{item.exampleSentence}&rdquo;</p>
-              </div>
-
-              <div className="flex items-start gap-2 text-[11px] text-slate-600 dark:text-slate-400 mb-2">
-                <Lightbulb size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                <p>
-                  <strong>How to use:</strong> {item.usageTip}
+                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+                  {item.meaning}
                 </p>
               </div>
 
-              <div className="flex items-start gap-2 text-[11px] text-rose-700 dark:text-rose-300 bg-rose-50/60 dark:bg-rose-950/30 p-2 rounded-xl border border-rose-200/60 dark:border-rose-900/40 mb-3">
+              <div className="p-3 rounded-2xl bg-paper-100/70 dark:bg-slate-800/60 border border-paper-200 dark:border-slate-700/60 mb-3">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-700 dark:text-blue-400 block mb-1">
+                  Example:
+                </span>
+                <p className="font-reading italic text-sm text-slate-800 dark:text-slate-100 leading-relaxed">
+                  &ldquo;{item.exampleSentence}&rdquo;
+                </p>
+              </div>
+
+              <div className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400 mb-2">
+                <Lightbulb size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                <p>
+                  <strong className="text-slate-800 dark:text-slate-200">How to use:</strong>{" "}
+                  {item.usageTip}
+                </p>
+              </div>
+
+              <div className="flex items-start gap-2 text-xs text-rose-700 dark:text-rose-300 bg-rose-50/60 dark:bg-rose-950/30 p-2.5 rounded-xl border border-rose-200/60 dark:border-rose-900/40 mb-3">
                 <AlertTriangle size={14} className="text-rose-500 flex-shrink-0 mt-0.5" />
                 <p>
                   <strong>Common mistake:</strong> {item.mistakeTip}

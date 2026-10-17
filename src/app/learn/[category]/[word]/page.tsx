@@ -132,10 +132,10 @@ export default function WordDetailPage({ params }: WordPageProps) {
       </nav>
 
       {/* Main Hero Card */}
-      <div className="glass-panel bg-white dark:bg-slate-900 rounded-3xl border border-amber-900/10 dark:border-slate-800 p-5 sm:p-7 shadow-card">
+      <div className="reading-book-card rounded-3xl p-6 sm:p-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* Real Photography */}
-          <div className="w-full md:w-64 h-56 rounded-2xl overflow-hidden relative shadow-md bg-amber-50 flex-shrink-0">
+          <div className="w-full md:w-64 h-56 rounded-2xl overflow-hidden relative shadow-md bg-paper-100 flex-shrink-0">
             <Image
               src={item.imageUrl}
               alt={`Real photograph of ${item.word}`}
@@ -152,7 +152,7 @@ export default function WordDetailPage({ params }: WordPageProps) {
           {/* Word Details */}
           <div className="flex-1 w-full">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-brand-700 dark:text-brand-300">
+              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
                 {categoryMeta?.label || item.category}
               </span>
               <span className="text-[10px] font-semibold capitalize px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
@@ -160,13 +160,13 @@ export default function WordDetailPage({ params }: WordPageProps) {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold font-reading text-slate-900 dark:text-white tracking-tight">
               {item.word}
             </h1>
 
             {item.pronunciation && (
               <p className="text-sm text-slate-500 font-mono mt-1">
-                Pronunciation: <span className="text-brand-600 font-bold">{item.pronunciation}</span>
+                Pronunciation: <span className="text-blue-600 dark:text-blue-400 font-bold">{item.pronunciation}</span>
               </p>
             )}
 
@@ -180,11 +180,11 @@ export default function WordDetailPage({ params }: WordPageProps) {
               />
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Meaning & Definition
               </h2>
-              <p className="text-base text-slate-800 dark:text-slate-200 font-medium mt-1 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-800 dark:text-slate-200 font-normal mt-1 leading-relaxed">
                 {item.meaning}
               </p>
             </div>
@@ -193,23 +193,23 @@ export default function WordDetailPage({ params }: WordPageProps) {
       </div>
 
       {/* Deep Dive Section: How to use [word] in a sentence */}
-      <section aria-labelledby="sentence-heading" className="rounded-3xl bg-white dark:bg-slate-900 border border-amber-900/10 dark:border-slate-800 p-5 sm:p-6 shadow-card space-y-4">
+      <section aria-labelledby="sentence-heading" className="reading-book-card rounded-3xl p-6 sm:p-7 space-y-4">
         <h2 id="sentence-heading" className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
           <span>How to Use &ldquo;{item.word}&rdquo; in a Sentence</span>
         </h2>
 
-        {/* Example Sentence Box */}
-        <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-brand-700 dark:text-brand-400 block mb-1">
+        {/* Example Sentence Box in Book Font */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-paper-100/70 dark:bg-slate-800/60 border border-paper-200 dark:border-slate-700/60">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-blue-700 dark:text-blue-400 block mb-1.5">
             Natural Context Example:
           </span>
-          <p className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 italic leading-relaxed">
+          <p className="text-base sm:text-lg font-medium text-slate-900 dark:text-slate-50 italic leading-relaxed font-reading">
             &ldquo;{item.exampleSentence}&rdquo;
           </p>
         </div>
 
         {/* Practical Usage Tip */}
-        <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40">
+        <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/40">
           <div className="flex items-start gap-2.5">
             <Lightbulb size={18} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
@@ -224,7 +224,7 @@ export default function WordDetailPage({ params }: WordPageProps) {
         </div>
 
         {/* Common Indian English Mistake Tip */}
-        <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40">
+        <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/40">
           <div className="flex items-start gap-2.5">
             <AlertTriangle size={18} className="text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
             <div>

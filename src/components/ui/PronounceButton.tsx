@@ -47,9 +47,9 @@ export function PronounceButton({
       onClick={speak}
       aria-label={`Listen to pronunciation of ${text}`}
       title="Listen to pronunciation"
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900 hover:bg-blue-100 transition-colors active:scale-95 ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200 border border-amber-200/80 dark:border-amber-900/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors active:scale-95 ${className}`}
     >
-      <Volume2 size={size} className={isPlaying ? "animate-pulse text-blue-600" : "text-blue-600"} />
+      <Volume2 size={size} className={isPlaying ? "animate-pulse text-amber-600 dark:text-amber-400" : "text-amber-600 dark:text-amber-400"} />
       {label && <span>{label}</span>}
     </button>
   );
